@@ -1,6 +1,6 @@
 #include "writeTransitionTable.h"
 
-TransitionTable writeTransitionTable(const TransitionTable &nfa)
+void writeTransitionTable(const TransitionTable &dfa, const std::string &filename)
 {
 
 }

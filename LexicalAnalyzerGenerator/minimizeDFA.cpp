@@ -1,6 +1,6 @@
 #include "minimizeDFA.h"
 
-TransitionTable minimizeDFA(const TransitionTable &nfa)
+TransitionTable minimizeDFA(const TransitionTable &dfa)
 {
 
 }

@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     // TODO write TransitionTable to file
     // input: TransitionTable, filename
     // file containing TransitionTable with proper format.
-    writeTransitionTable(filename, minDFA);
+    writeTransitionTable(minDFA, filename);
 
     return 0;
 }
