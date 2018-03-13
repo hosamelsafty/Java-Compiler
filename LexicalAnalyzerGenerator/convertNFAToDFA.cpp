@@ -2,5 +2,5 @@
 
 TransitionTable convertNFAToDFA(const TransitionTable &nfa)
 {
-
+	return nfa;
 }

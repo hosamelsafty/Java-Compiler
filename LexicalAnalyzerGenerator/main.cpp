@@ -1,13 +1,15 @@
-
 #include "minimizeDFA.h"
+#include "TransitionTable.h"
 #include "convertNFAToDFA.h"
 #include "convertRulesToNFA.h"
 #include "writeTransitionTable.h"
 
-#include "TransitionTable.h"
+#include <string>
 
 int main(int argc, char** argv)
 {
+	std::string filename;
+
     // TODO Read Rules file and convert to NFA
     // input: filename
     // output: TransitionTable
@@ -16,12 +18,12 @@ int main(int argc, char** argv)
     // TODO Convert NFA to DFA
     // input: TransitionTable
     // output: TransitionTable
-    TransitionTable dfa = convertNFAToDFA(filename);
+    TransitionTable dfa = convertNFAToDFA(nfa);
 
     // TODO minimize DFA
     // input: TransitionTable
     // output: TransitionTable
-    TransitionTable minDFA= minimizeDFA(filename);
+    TransitionTable minDFA= minimizeDFA(dfa);
 
     // TODO write TransitionTable to file
     // input: TransitionTable, filename

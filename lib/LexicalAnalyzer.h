@@ -9,7 +9,7 @@
 class LexicalAnalyzer
 {
 public:
-    LexicalAnalyzer(const TransitionTable &transitionTable, istream& in);
+    LexicalAnalyzer(const TransitionTable &transitionTable, std::istream& in);
     ~LexicalAnalyzer();
 
     Token nextToken();

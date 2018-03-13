@@ -2,5 +2,5 @@
 
 TransitionTable minimizeDFA(const TransitionTable &dfa)
 {
-
+	return dfa;
 }

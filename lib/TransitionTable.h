@@ -21,7 +21,7 @@ private:
 
 };
 
-ostream& operator<<(ostream& out, const Transitiontable &transitionTable);
-istream& operator>>(istream& in, Transitiontable &transitionTable);
+std::ostream& operator<<(std::ostream& out, const TransitionTable &transitionTable);
+std::istream& operator>>(std::istream& in, TransitionTable &transitionTable);
 
 #endif // TransitionTable_H

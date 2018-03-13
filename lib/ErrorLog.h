@@ -15,6 +15,6 @@ private:
 
 };
 
-ostream& operator<<(ostream& out, const ErrorLog &errorLog);
+std::ostream& operator<<(std::ostream& out, const ErrorLog &errorLog);
 
 #endif // ErrorLog_H

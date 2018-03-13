@@ -16,7 +16,7 @@ void ErrorLog::add(const std::string &lexeme, int lineNumber, int positionInLine
 }
 
 
-ostream& operator<<(ostream& out, const ErrorLog &errorLog)
+std::ostream& operator<<(std::ostream& out, const ErrorLog &errorLog)
 {
-
+	return out;
 }

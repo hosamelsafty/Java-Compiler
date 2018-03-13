@@ -10,22 +10,22 @@ TransitionTable::~TransitionTable()
 
 }
 
-void TransitionTable::add(std::vector<State> currentStates, char input, std::vector<State> nextStates)
+void TransitionTable::add(const std::vector<State> &currentStates, char input, const std::vector<State> &nextStates)
 {
 
 }
 
-std::vector<State> TransitionTable::nextStates(std::vector<State> currentStates, char input) const
+std::vector<State> TransitionTable::nextStates(const std::vector<State> &currentStates, char input) const
 {
-    
+	return std::vector<State>();
 }
 
-ostream& operator<<(ostream& out, const Transitiontable &transitionTable)
+std::ostream& operator<<(std::ostream& out, const TransitionTable &transitionTable)
 {
-
+	return out;
 }
 
-istream& operator>>(istream& in, Transitiontable &transitionTable)
+std::istream& operator>>(std::istream& in, TransitionTable &transitionTable)
 {
-
+	return in;
 }
