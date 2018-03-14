@@ -6,10 +6,12 @@
 
 #include <iostream>
 
+class ErrorLog;
+
 class LexicalAnalyzer
 {
 public:
-    LexicalAnalyzer(const TransitionTable &transitionTable, std::istream& in);
+    LexicalAnalyzer(const TransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog);
     ~LexicalAnalyzer();
 
     Token nextToken();
