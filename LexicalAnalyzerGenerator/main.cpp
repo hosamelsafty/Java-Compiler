@@ -8,12 +8,12 @@
 
 int main(int argc, char** argv)
 {
-	std::string filename;
+	std::string rulesFilename;
 
     // TODO Read Rules file and convert to NFA
     // input: filename
     // output: TransitionTable
-    TransitionTable nfa = convertRulesToNFA(filename);
+    TransitionTable nfa = convertRulesToNFA(rulesFilename);
 
     // TODO Convert NFA to DFA
     // input: TransitionTable
@@ -25,10 +25,15 @@ int main(int argc, char** argv)
     // output: TransitionTable
     TransitionTable minDFA= minimizeDFA(dfa);
 
+	// Examples
+	minDFA.add(std::set<State>{State("asd"), State("qwe")}, 'a', std::set<State>{State("asd"), State("qwe")});
+	minDFA.add(std::set<State>{State("asd"), State("qwe")}, 'b', std::set<State>{State("asd"), State("qwe")});
+
     // TODO write TransitionTable to file
     // input: TransitionTable, filename
     // file containing TransitionTable with proper format.
-    writeTransitionTable(minDFA, filename);
+	std::string outputFilename = "tt.json";
+    writeTransitionTable(minDFA, outputFilename);
 
     return 0;
 }
