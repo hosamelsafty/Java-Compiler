@@ -15,7 +15,7 @@ before pushing your work.
 Use CMake to configure a project according to your environment and available building tools. Just use:
 
 ```
-cmake
+cmake ./
 ```
 
 Then build the created project.
