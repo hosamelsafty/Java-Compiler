@@ -1,6 +1,6 @@
-#include "ErrorLog.h"
-#include "TransitionTable.h"
-#include "LexicalAnalyzer.h"
+#include "lib/ErrorLog.h"
+#include "lib/TransitionTable.h"
+#include "lib/LexicalAnalyzer.h"
 #include "readTransitionTable.h"
 #include "writeErrorLogToFile.h"
 #include "printTokensToScreen.h"
@@ -16,7 +16,7 @@ int main(int argc, char** argv)
     // output: TransitionTable
     TransitionTable dfa = readTransitionTable(transitionTableFilename);
 
-    // TODO Create ErrorLig 
+    // TODO Create ErrorLig
     ErrorLog errorLog;
 
 	std::string codeFilename;
