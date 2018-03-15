@@ -1,7 +1,7 @@
 #ifndef printTokensToScreen_H
 #define printTokensToScreen_H
 
-#include "LexicalAnalyzer.h"
+#include "lib/LexicalAnalyzer.h"
 
 void printTokensToScreen(const LexicalAnalyzer &lexicalAnalyzer);
 

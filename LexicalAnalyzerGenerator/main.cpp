@@ -1,5 +1,5 @@
 #include "minimizeDFA.h"
-#include "TransitionTable.h"
+#include "lib/TransitionTable.h"
 #include "convertNFAToDFA.h"
 #include "convertRulesToNFA.h"
 #include "writeTransitionTable.h"

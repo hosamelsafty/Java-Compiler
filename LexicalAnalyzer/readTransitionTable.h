@@ -2,7 +2,7 @@
 #define readTransitionTable_H
 
 #include <string>
-#include "TransitionTable.h"
+#include "lib/TransitionTable.h"
 
 TransitionTable readTransitionTable(const std::string &filename);
 

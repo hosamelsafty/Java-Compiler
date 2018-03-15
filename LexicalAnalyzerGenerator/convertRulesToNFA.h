@@ -2,7 +2,7 @@
 #define convertRulesToNFA_H
 
 #include <string>
-#include "TransitionTable.h"
+#include "lib/TransitionTable.h"
 
 TransitionTable convertRulesToNFA(const std::string &filename);
 
