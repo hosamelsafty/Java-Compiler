@@ -41,7 +41,7 @@ void TransitionTable::add(const std::set<State> &currentStates, char input, cons
 		m_d->table.insert(std::pair<std::set<State>, std::map<char, std::set<State> > >(currentStates, std::map<char, std::set<State> >()));
 	}
 
-	m_d->table[currentStates].insert_or_assign(input, nextStates);
+	m_d->table[currentStates][input] = nextStates;
 	//rowIt->second.insert_or_assign(input, nextStates);
 }
 
@@ -56,7 +56,7 @@ std::ostream& operator<<(std::ostream& out, const TransitionTable &transitionTab
 	Document d;
 	d.SetObject();
 	Document::AllocatorType& allocator = d.GetAllocator();
-	
+
 	d.AddMember("tt", Value(), allocator);
 	d["tt"].SetArray();
 	for (const std::pair<std::set<State>, std::map<char, std::set<State> >> & transitionTableRow : transitionTable.m_d->table)
@@ -95,7 +95,7 @@ std::ostream& operator<<(std::ostream& out, const TransitionTable &transitionTab
 	StringBuffer sb;
 	PrettyWriter<StringBuffer> writer(sb);
 	d.Accept(writer);    // Accept() traverses the DOM and generates Handler events.
-	
+
 	out << sb.GetString();
 	return out;
 }
