@@ -22,7 +22,9 @@ public:
 private:
 	struct impl;
 	std::unique_ptr<impl> m_d;
-	friend std::ostream& operator<<(std::ostream& out, const TransitionTable &transitionTable);
+
+	friend std::ostream& operator << (std::ostream& out, const TransitionTable &transitionTable);
+	friend std::istream& operator >> (std::istream& in, TransitionTable &transitionTable);
 };
 
 std::ostream& operator<<(std::ostream& out, const TransitionTable &transitionTable);

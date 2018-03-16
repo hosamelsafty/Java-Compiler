@@ -6,6 +6,8 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
+#include "rapidjson/istreamwrapper.h"
+#include "rapidjson/ostreamwrapper.h"
 
 #include <map>
 #include <set>
@@ -35,14 +37,7 @@ TransitionTable::~TransitionTable()
 
 void TransitionTable::add(const std::set<State> &currentStates, char input, const std::set<State> &nextStates)
 {
-	auto rowIt = m_d->table.find(currentStates);
-	if (rowIt == m_d->table.end())
-	{
-		m_d->table.insert(std::pair<std::set<State>, std::map<char, std::set<State> > >(currentStates, std::map<char, std::set<State> >()));
-	}
-
-	m_d->table[currentStates].insert_or_assign(input, nextStates);
-	//rowIt->second.insert_or_assign(input, nextStates);
+	m_d->table[currentStates][input] = nextStates;
 }
 
 std::set<State> TransitionTable::nextStates(const std::set<State> &currentStates, char input) const
@@ -61,47 +56,85 @@ std::ostream& operator<<(std::ostream& out, const TransitionTable &transitionTab
 	d["tt"].SetArray();
 	for (const std::pair<std::set<State>, std::map<char, std::set<State> >> & transitionTableRow : transitionTable.m_d->table)
 	{
-		Value & row = d["tt"].PushBack(Value(), allocator);
+		Value row;
 		row.SetObject();
 
-		row.AddMember("currentStates", Value(), allocator);
-		row["currentStates"].SetArray();
+		Value currentStatesArray;
+		currentStatesArray.SetArray();
 
 		for (const State &currentState : transitionTableRow.first)
 		{
 			Value value(currentState.name.c_str(), currentState.name.size(), allocator);
-			row["currentStates"].PushBack(value, allocator);
+			currentStatesArray.PushBack(value, allocator);
 		}
+		row.AddMember("currentStates", currentStatesArray, allocator);
 
 		for (const std::pair<char, std::set<State>> &inputResultPair : transitionTableRow.second)
 		{
-			std::string charString(1, inputResultPair.first);
-			Value input(charString.c_str(), charString.size(), allocator);
-			row.AddMember(input, Value(), allocator);
-
-			Value input2(charString.c_str(), charString.size(), allocator);
-			Value & nextStatesArray = row[input2];
+			Value nextStatesArray;
 			nextStatesArray.SetArray();
 
 			for (const State &nextState : inputResultPair.second)
 			{
-				Value value(nextState.name.c_str(), nextState.name.size(), allocator);
-				nextStatesArray.PushBack(value, allocator);
+				Value state(nextState.name.c_str(), nextState.name.size(), allocator);
+				nextStatesArray.PushBack(state, allocator);
 			}
+
+			std::string charString(1, inputResultPair.first);
+			Value input(charString.c_str(), charString.size(), allocator);
+			row.AddMember(input, nextStatesArray, allocator);
 		}
 
+		d["tt"].PushBack(row, allocator);
 	}
 
-	StringBuffer sb;
-	PrettyWriter<StringBuffer> writer(sb);
-	d.Accept(writer);    // Accept() traverses the DOM and generates Handler events.
-	
-	out << sb.GetString();
+	OStreamWrapper osw(out);
+	PrettyWriter<OStreamWrapper> writer(osw);
+	d.Accept(writer);
+
 	return out;
 }
 
 std::istream& operator>>(std::istream& in, TransitionTable &transitionTable)
 {
+	using namespace rapidjson;
+
+	IStreamWrapper isw(in);
+
+	Document d;
+	d.ParseStream(isw);
+
+	std::map < std::set<State>, std::map<char, std::set<State> > > table;
+
+	for ( auto& row : d["tt"].GetArray())
+	{
+		std::set<State> currentStates;
+
+		for (auto& v : row["currentStates"].GetArray())
+		{
+			currentStates.emplace(State(v.GetString()));
+		}
+
+		for (auto& m : row.GetObject())
+		{
+			std::string name(m.name.GetString());
+			if (name != "currentStates")
+			{
+				char input = name[0];
+				std::set<State> nextStates;
+
+				for (auto& v : m.value.GetArray())
+				{
+					nextStates.emplace(State(v.GetString()));
+				}
+
+				table[currentStates][input] = nextStates;
+			}
+		}
+
+	}
+
+	transitionTable.m_d->table = table;
 
 	return in;
 }
