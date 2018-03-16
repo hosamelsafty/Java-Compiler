@@ -1,8 +1,9 @@
 #include "minimizeDFA.h"
-#include "lib/TransitionTable.h"
 #include "convertNFAToDFA.h"
 #include "convertRulesToNFA.h"
 #include "writeTransitionTable.h"
+
+#include "lib/TransitionTable.h"
 
 #include <string>
 
@@ -28,6 +29,9 @@ int main(int argc, char** argv)
 	// Examples
 	minDFA.add(std::set<State>{State("asd"), State("qwe")}, 'a', std::set<State>{State("asd"), State("qwe")});
 	minDFA.add(std::set<State>{State("asd"), State("qwe")}, 'b', std::set<State>{State("asd"), State("qwe")});
+
+	minDFA.add(std::set<State>{State("toot")}, 'a', std::set<State>{State("asd"), State("qwe")});
+	minDFA.add(std::set<State>{State("toot")}, 'b', std::set<State>{State("asd"), State("qwe")});
 
     // TODO write TransitionTable to file
     // input: TransitionTable, filename

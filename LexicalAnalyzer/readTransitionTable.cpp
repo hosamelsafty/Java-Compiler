@@ -1,6 +1,13 @@
 #include "readTransitionTable.h"
 
+#include <fstream>
+
 TransitionTable readTransitionTable(const std::string &filename)
 {
-	return TransitionTable();
+	TransitionTable transitionTable;
+	std::ifstream file;
+	file.open(filename);
+	file >> transitionTable;
+	file.close();
+	return transitionTable;
 }
