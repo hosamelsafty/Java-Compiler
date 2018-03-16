@@ -1,13 +1,16 @@
 #include "convertRulesToNFA.h"
 #include <fstream>
+#include "RulesHandler.h"
 using namespace std;
 
 void readRulesFile(const std::string &filename);
 
 TransitionTable convertRulesToNFA(const std::string &filename)
 {
-	readRulesFile(filename);
 
+	RulesHandler rules;
+
+	rules.init_rules();
 	return TransitionTable();
 }
 

@@ -16,12 +16,10 @@ using namespace std;
 class RulesHandler {
 public:
 	RulesHandler();
-	vector<pair<string,string>>regExp;
-	vector<pair<string,string>>regDef;
+	vector<pair<string,string > >regExp;
+	vector<pair<string,string > > regDef;
     vector<string>punc;
     vector<string>keyword;
-
-
 
     void init_rules();
 
