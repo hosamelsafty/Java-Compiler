@@ -45,6 +45,30 @@ std::set<State> TransitionTable::nextStates(const std::set<State> &currentStates
 	return m_d->table[currentStates][input];
 }
 
+
+std::vector<std::set<State>> TransitionTable::currentStatesValues() const
+{
+	std::vector<std::set<State>> keys;
+	for( auto& pair : m_d->table)
+	{
+		keys.push_back(pair.first);
+	}
+	return keys;
+}
+
+std::vector<char> TransitionTable::inputValues() const
+{
+	std::vector<char> keys;
+	for (auto& rowPair : m_d->table)
+	{
+		for (auto& pair : rowPair.second)
+		{
+			keys.push_back(pair.first);
+		}
+	}
+	return keys;
+}
+
 std::ostream& operator<<(std::ostream& out, const TransitionTable &transitionTable)
 {
 	using namespace rapidjson;
