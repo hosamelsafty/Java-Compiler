@@ -5,6 +5,7 @@
 #include <set>
 #include <iostream>
 #include <memory>
+#include <vector>
 
 #include "State.h"
 
@@ -18,6 +19,10 @@ public:
     void add(const std::set<State> &currentStates, char input, const std::set<State> &nextStates);
 
     std::set<State> nextStates(const std::set<State> &currentStates, char input) const;
+
+    std::vector<std::set<State>> currentStatesValues() const;
+
+    std::vector<char> inputValues() const;
 
 private:
 	struct impl;
