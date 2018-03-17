@@ -41,8 +41,8 @@ DFATransitionTable minimizeDFA(const DFATransitionTable &dfa)
                 classes.push_back(groups[j]);
             }
         }
-        if(classes.size() == 2 * end + 1){
-            finish = true;
+        if(classes.size() != 2 * end + 1){
+            finish = false;
         }
         for(int i = 0; i <= end; i++){
             classes.erase(classes.begin());
