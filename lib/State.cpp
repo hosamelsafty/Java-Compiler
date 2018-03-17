@@ -1,17 +1,22 @@
 #include "State.h"
 
-State::State()
+State::State(int number)
+	: id(number)
 {
-
+	type = REGULAR;
 }
 
-State::State(const std::string name)
-	: name(name)
+void State::setType(Type t)
 {
-
+	type = t;
 }
+
+Type State::getType() const { return type; }
+
+int State::getID()const  { return id;}
+
 
 bool operator<(const State &lhs, const State &rhs)
 {
-	return lhs.name < rhs.name;
+	return lhs.getID() < rhs.getID();
 }
