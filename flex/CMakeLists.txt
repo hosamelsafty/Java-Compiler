@@ -7,7 +7,7 @@ project (JavaCompilerFlex)
 
 find_package(FLEX)
 
-FLEX_TARGET(MyScanner test.l  ${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp)
+FLEX_TARGET(MyScanner lex_rules.l  ${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp)
 #include_directories("D:/Program Files (x86)/GnuWin32/include")
 #LINK_DIRECTORIES("D:/Program Files (x86)/GnuWin32/lib")
 
