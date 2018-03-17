@@ -1,6 +1,8 @@
 #include "convertNFAToDFA.h"
 #include <queue>
 
+bool isAcceptance(std::set<State> s);
+
 DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
 {
     using namespace std;
@@ -22,6 +24,9 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
         {
             if(map.find(pair.second) == map.end()){
                 State newState(newStateId++);
+                if(isAcceptance(pair.second)){
+                    newState.setType(ACCEPTING);
+                }
                 map[pair.second] = newState;
                 workingSet.push(pair.second);
             }
@@ -29,4 +34,12 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
         }
     }
 	return DFA;
+}
+bool isAcceptance(std::set<State> s){
+    for(auto& st : s){
+        if(st.getType() == ACCEPTING){
+            return true;
+        }
+    }
+    return false;
 }
