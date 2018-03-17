@@ -8,6 +8,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/bin)
 cmake_minimum_required (VERSION 2.8.11)
 project (JavaCompiler)
 
+if(CMAKE_COMPILER_IS_GNUXX)
+  add_compile_options(-std=c++14) # CMake 2.8.12 or newer
+ENDIF()
+
 include_directories(./)
 
 # Recurse into the "Hello" and "Demo" subdirectories. This does not actually
