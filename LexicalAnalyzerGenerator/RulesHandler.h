@@ -20,6 +20,10 @@ public:
 	vector<pair<string,string > > regDef;
     vector<string>punc;
     vector<string>keyword;
+    string expand_slash(string line);
+    void edit_expression_from_definition();
+    	string expand_seq(char from,char to);
+    	void replaceAll(std::string& str, const std::string& from, const std::string& to) ;
 
     void init_rules();
 
