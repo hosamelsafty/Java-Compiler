@@ -1,8 +1,9 @@
 #ifndef convertNFAToDFA_H
 #define convertNFAToDFA_H
 
-#include "lib/TransitionTable.h"
+#include "lib/NFATransitionTable.h"
+#include "lib/DFATransitionTable.h"
 
-TransitionTable convertNFAToDFA(const TransitionTable &nfa);
+DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa);
 
 #endif // convertNFAToDFA_H

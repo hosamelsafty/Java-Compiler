@@ -1,8 +1,8 @@
 #ifndef minimizeDFA_H
 #define minimizeDFA_H
 
-#include "lib/TransitionTable.h"
+#include "lib/DFATransitionTable.h"
 
-TransitionTable minimizeDFA(const TransitionTable &dfa);
+DFATransitionTable minimizeDFA(const DFATransitionTable &dfa);
 
 #endif // minimizeDFA_H

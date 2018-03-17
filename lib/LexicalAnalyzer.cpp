@@ -1,7 +1,7 @@
 #include "LexicalAnalyzer.h"
 #include "ErrorLog.h"
 
-LexicalAnalyzer::LexicalAnalyzer(const TransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog)
+LexicalAnalyzer::LexicalAnalyzer(const DFATransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog)
 {
 
 }

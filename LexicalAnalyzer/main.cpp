@@ -1,5 +1,5 @@
 #include "lib/ErrorLog.h"
-#include "lib/TransitionTable.h"
+#include "lib/NFATransitionTable.h"
 #include "lib/LexicalAnalyzer.h"
 #include "readTransitionTable.h"
 #include "writeErrorLogToFile.h"
@@ -14,7 +14,7 @@ int main(int argc, char** argv)
     // TODO Read TransitionTable from file
     // input: filename
     // output: TransitionTable
-    TransitionTable dfa = readTransitionTable(transitionTableFilename);
+    DFATransitionTable dfa = readTransitionTable(transitionTableFilename);
 
     // TODO Create ErrorLig
     ErrorLog errorLog;

@@ -1,6 +1,6 @@
 #include "convertRulesToNFA.h"
 
-TransitionTable convertRulesToNFA(const std::string &filename)
+NFATransitionTable convertRulesToNFA(const std::string &filename)
 {
-	return TransitionTable();
+	return NFATransitionTable();
 }
