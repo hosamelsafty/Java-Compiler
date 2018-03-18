@@ -1,10 +1,11 @@
 #include "minimizeDFA.h"
 
-bool is_equal(std::vector<int> v1, std::vector<int> v2);
 std::vector<std::pair<State, std::vector<int> > > getAcceptedStates(std::vector<State> v);
+std::vector<std::pair<State, std::vector<int> > > getNotAcceptedStates(std::vector<State> v);
+void matchStates(const DFATransitionTable &dfa, std::vector<std::vector<std::pair<State, std::vector<int> > > > &classes);
 int findClass(std::vector<std::vector<std::pair<State, std::vector<int> > > > classes, unsigned long long int end, int id);
 std::vector<std::vector<std::pair<State, std::vector<int> > > > split(std::vector<std::pair<State, std::vector<int> > >group);
-std::vector<std::pair<State, std::vector<int> > > getNotAcceptedStates(std::vector<State> v);
+bool is_equal(std::vector<int> v1, std::vector<int> v2);
 
 DFATransitionTable minimizeDFA(const DFATransitionTable &dfa)
 {
@@ -16,24 +17,7 @@ DFATransitionTable minimizeDFA(const DFATransitionTable &dfa)
     unsigned long long int end = 1;
     while(!finish){
         finish = true;
-        for(int i = 0; i <= end; i++){
-            unsigned long long int n = classes[i].size();
-            for(int j = 0; j < n; j++){
-                std::map<char, State> trans = dfa.getMapping(classes[i][j].first);
-                for(char c = '0'; c <= '9'; c++){
-                    State s = trans[c];
-                    classes[i][j].second.push_back(findClass(classes, end, s.getID()));
-                }
-                for(char c = 'a'; c <= 'z'; c++){
-                    State s = trans[c];
-                    classes[i][j].second.push_back(findClass(classes, end, s.getID()));
-                }
-                for(char c = 'A'; c <= 'Z'; c++){
-                    State s = trans[c];
-                    classes[i][j].second.push_back(findClass(classes, end, s.getID()));
-                }
-            }
-        }
+        matchStates(dfa, classes);
         for(int i = 0; i <= end; i++){
             std::vector<std::vector<std::pair<State, std::vector<int> > > > groups = split(classes[i]);
             unsigned long long int len = groups.size();
@@ -49,7 +33,27 @@ DFATransitionTable minimizeDFA(const DFATransitionTable &dfa)
         }
         end = classes.size();
     }
-	return dfa;
+    matchStates(dfa, classes);
+    DFATransitionTable min_dfa;
+    unsigned long long int no_states = classes.size();
+    State _states[no_states];
+    for(int i = 0; i < no_states; i++){
+        _states[i] = State(i);
+        _states[i].setType(classes[i][0].first.getType());
+    }
+    for(int i = 0; i < no_states; i++){
+        int counter = 0;
+        for(char c = '0'; c <= '9'; c++){
+            min_dfa.add(_states[i], c, _states[classes[i][0].second[counter++]]);
+        }
+        for(char c = 'a'; c <= 'a'; c++){
+            min_dfa.add(_states[i], c, _states[classes[i][0].second[counter++]]);
+        }
+        for(char c = 'A'; c <= 'Z'; c++){
+            min_dfa.add(_states[i], c, _states[classes[i][0].second[counter++]]);
+        }
+    }
+	return min_dfa;
 }
 
 std::vector<std::pair<State, std::vector<int> > > getAcceptedStates(std::vector<State> v){
@@ -58,7 +62,7 @@ std::vector<std::pair<State, std::vector<int> > > getAcceptedStates(std::vector<
     for(int i = 0; i < len; i++){
         if(v[i].getType() == ACCEPTING){
             std::vector<int> t;
-            res.push_back(make_pair(v[i], t));
+            res.emplace_back(v[i], t);
         }
     }
     return res;
@@ -70,10 +74,32 @@ std::vector<std::pair<State, std::vector<int> > > getNotAcceptedStates(std::vect
     for(int i = 0; i < len; i++){
         if(v[i].getType() != ACCEPTING){
             std::vector<int> t;
-            res.push_back(make_pair(v[i], t));
+            res.emplace_back(v[i], t);
         }
     }
     return res;
+}
+
+void matchStates(const DFATransitionTable &dfa, std::vector<std::vector<std::pair<State, std::vector<int> > > > &classes){
+    unsigned long long int end = classes.size();
+    for(int i = 0; i <= end; i++){
+        unsigned long long int n = classes[i].size();
+        for(int j = 0; j < n; j++){
+            std::map<char, State> trans = dfa.getMapping(classes[i][j].first);
+            for(char c = '0'; c <= '9'; c++){
+                State s = trans[c];
+                classes[i][j].second.push_back(findClass(classes, end, s.getID()));
+            }
+            for(char c = 'a'; c <= 'z'; c++){
+                State s = trans[c];
+                classes[i][j].second.push_back(findClass(classes, end, s.getID()));
+            }
+            for(char c = 'A'; c <= 'Z'; c++){
+                State s = trans[c];
+                classes[i][j].second.push_back(findClass(classes, end, s.getID()));
+            }
+        }
+    }
 }
 
 int findClass(std::vector<std::vector<std::pair<State, std::vector<int> > > > classes, unsigned long long int end, int id){
@@ -97,12 +123,12 @@ std::vector<std::vector<std::pair<State, std::vector<int> > > > split(std::vecto
         vis[j] = true;
         std::vector<std::pair<State, std::vector<int> > >temp;
         std::vector<int> v;
-        temp.push_back(make_pair(group[j].first, v));
+        temp.emplace_back(group[j].first, v);
         for (int k = j + 1; k < n; k++) {
             if (is_equal(group[j].second, group[k].second)) {
                 vis[k] = true;
                 std::vector<int> vt;
-                temp.push_back(make_pair(group[k].first, vt));
+                temp.emplace_back(group[k].first, vt);
             }
         }
         res.push_back(temp);
