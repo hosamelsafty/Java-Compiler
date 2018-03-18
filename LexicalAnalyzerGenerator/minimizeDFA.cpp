@@ -7,6 +7,8 @@ int findClass(std::vector<std::vector<std::pair<State, std::vector<int> > > > cl
 std::vector<std::vector<std::pair<State, std::vector<int> > > > split(std::vector<std::pair<State, std::vector<int> > >group);
 bool is_equal(std::vector<int> v1, std::vector<int> v2);
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 DFATransitionTable minimizeDFA(const DFATransitionTable &dfa)
 {
     std::vector<State> states = dfa.getStates();
@@ -55,6 +57,7 @@ DFATransitionTable minimizeDFA(const DFATransitionTable &dfa)
     }
 	return min_dfa;
 }
+#pragma clang diagnostic pop
 
 std::vector<std::pair<State, std::vector<int> > > getAcceptedStates(std::vector<State> v){
     std::vector<std::pair<State, std::vector<int> > > res;
