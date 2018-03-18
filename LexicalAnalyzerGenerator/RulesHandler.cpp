@@ -41,17 +41,41 @@ static inline std::string &trim(std::string &s) {
     return ltrim(rtrim(s));
 }
 
-void RulesHandler::edit_expression_from_definition(){//TODO R T
+void RulesHandler::edit_expression_from_definition(){
 	for (int i = 0; i < regDef.size(); ++i) {
-		for (int j = 0; j < regExp.size(); ++j) {
-//			cout<<"before::"<<regExp.at(j).second<<endl;
-			replaceAll(regExp.at(j).second, regDef.at(i).first, regDef.at(i).second);
-//			cout << regExp.at(j).second<<endl;
-//			cout<<"after::"<<regExp.at(j).second<<endl;
+		for (int j = i+1; j < regDef.size(); ++j) {
+			replaceAll(regDef.at(j).second, regDef.at(i).first, regDef.at(i).second);
 		}
+
+	}
+	for (int i = regDef.size()-1; i >= 0; --i) {
+		for (int j = 0; j < regExp.size(); ++j) {
+//					cout<<"before::"<<regExp.at(j).second<<endl;
+					replaceAll(regExp.at(j).second, regDef.at(i).first, regDef.at(i).second);
+//					cout<<"after::"<<regExp.at(j).second<<endl;
+				}
 	}
 }
 
+size_t RulesHandler::split(const std::string &txt, std::vector<std::string> &strs, char ch)
+{
+    size_t pos = txt.find( ch );
+    size_t initialPos = 0;
+    strs.clear();
+
+    // Decompose statement
+    while( pos != std::string::npos ) {
+        strs.push_back( txt.substr( initialPos, pos - initialPos ) );
+        initialPos = pos + 1;
+
+        pos = txt.find( ch, initialPos );
+    }
+
+    // Add the last one
+    strs.push_back( txt.substr( initialPos, std::min( pos, txt.size() ) - initialPos + 1 ) );
+
+    return strs.size();
+}
 /*
  * Main method that do all parsing before generating NFA and initialise all lists.
  */
@@ -67,21 +91,21 @@ void RulesHandler::init_rules() {
 		if(line.at(0)=='['){
 			line=line.substr(1,line.length()-2);
 			trim(line);
+			add_in_symbol_table(line,"keyword");
 			keyword.push_back(line);
-			break;
 		}
 		else if(line.at(0)=='{'){
 			line=line.substr(1,line.length()-2);
 			trim(line);
+			add_in_symbol_table(line,"punctuation");
 			punc.push_back(line);
-			break;
 		}
 		else{
 			replaceAll(line, " ", "");
 			for (int i = 0; i < line.length(); ++i) {
 				if(line.at(i)==':'){
 					pair <string,string> temp (line.substr(0,i),line.substr(i+1,line.length()));
-
+//					cout<<temp.first<<" "<<temp.second<<endl;
 					regExp.push_back(temp);
 					break;
 				}
@@ -144,7 +168,15 @@ string RulesHandler::expand_slash(string line){
 		}
 return temp;
 }
-
+void RulesHandler::add_in_symbol_table(string line,string type){
+	vector<string> res;
+	split( line, res, ' ' );
+	for (int i = 0; i < res.size(); ++i) {
+		replaceAll(res[i], "\\", "");
+		Token token(type,res[i]);
+		symbol_table.push_back(token);
+	}
+}
 RulesHandler::~RulesHandler() {
 }
 
