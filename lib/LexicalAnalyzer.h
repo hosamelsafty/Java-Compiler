@@ -15,6 +15,11 @@ public:
     ~LexicalAnalyzer();
 
     Token nextToken();
+private:
+    std::istream& input;
+    ErrorLog &errLog;
+    DFATransitionTable& dfa_t;
+    std::string remainingInput;
 };
 
 #endif // LexicalAnalyzer_H

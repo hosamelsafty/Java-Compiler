@@ -1,7 +1,14 @@
 #include "State.h"
+#include <string>
 
-State::State(int number)
-	: id(number)
+State::State()
+	: id(-1)
+{
+	type = REGULAR;
+}
+
+State::State(int number, std::string mT)
+	: id(number),matchToken(mT)
 {
 	type = REGULAR;
 }
@@ -15,6 +22,9 @@ Type State::getType() const { return type; }
 
 int State::getID()const  { return id;}
 
+std::string State::getMatchedToken() const{
+	return matchToken;
+}
 
 bool operator<(const State &lhs, const State &rhs)
 {

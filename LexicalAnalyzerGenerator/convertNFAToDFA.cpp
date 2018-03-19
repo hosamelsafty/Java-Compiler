@@ -19,11 +19,11 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
     queue<set<State>> workingSet;
     workingSet.push(nfa.getStartingSet());
 
-    DFATransitionTable DFA;
     int newStateId = 0;
     State  startState(newStateId++);
     startState.setType(STARTING);
     map[nfa.getStartingSet()] = startState;
+    DFATransitionTable DFA(startState);
     while(!workingSet.empty())
     {
         set<State> s = workingSet.front();
