@@ -28,6 +28,9 @@ public:
     	void add_in_symbol_table(string line,string type);
     void init_rules();
     size_t split(const std::string &txt, std::vector<std::string> &strs, char ch);
+	string formatRegEx(string regex) ;
+	int  getPrecedence(char c);
+ 	string infixToPostfix(string regex) ;
     virtual ~RulesHandler();
 private:
 

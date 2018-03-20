@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <functional>
 #include <cctype>
-#include <locale>
+#include <stack>          // std::stack
 using namespace std;
 
 RulesHandler::RulesHandler() {
@@ -50,9 +50,9 @@ void RulesHandler::edit_expression_from_definition(){
 	}
 	for (int i = regDef.size()-1; i >= 0; --i) {
 		for (int j = 0; j < regExp.size(); ++j) {
-//					cout<<"before::"<<regExp.at(j).second<<endl;
+//					xxcout<<"before::"<<regExp.at(j).second<<endl;
 					replaceAll(regExp.at(j).second, regDef.at(i).first, regDef.at(i).second);
-//					cout<<"after::"<<regExp.at(j).second<<endl;
+//					cout<<regExp.at(j).first<<" : "<<regExp.at(j).second<<endl;
 				}
 	}
 }
@@ -102,6 +102,10 @@ void RulesHandler::init_rules() {
 		}
 		else{
 			replaceAll(line, " ", "");
+			replaceAll(line, "\\+", "+");
+			replaceAll(line, "\\=", "=");
+			replaceAll(line, "\\*", "*");
+
 			for (int i = 0; i < line.length(); ++i) {
 				if(line.at(i)==':'){
 					pair <string,string> temp (line.substr(0,i),line.substr(i+1,line.length()));
@@ -126,7 +130,11 @@ void RulesHandler::init_rules() {
 	  myfile.close();
 
 	  edit_expression_from_definition();
-
+		for (int i = 0; i < regExp.size(); ++i) {
+//			cout<<"before::"<<regExp[i].second<<endl;
+			regExp[i].second=formatRegEx(regExp[i].second);
+			cout<<"after::"<<regExp[i].second<<endl;
+		}
 }
 void RulesHandler::replaceAll(std::string& str, const std::string& from, const std::string& to) {
     if(from.empty())
@@ -177,6 +185,102 @@ void RulesHandler::add_in_symbol_table(string line,string type){
 		symbol_table.push_back(token);
 	}
 }
+int  RulesHandler::getPrecedence(char c){
+
+		switch (c) {
+			case '(':
+				return 1;
+				break;
+			case '|':
+				return 2;
+				break;
+			case ' ':
+				return 3;
+				break;
+			case '*':
+				return 4;
+				break;
+			case '+':
+				return 4;
+				break;
+			default:
+				return 6;
+				break;
+		}
+}
+	 string RulesHandler::formatRegEx(string regex) {
+		 string res="";
+		 static const char arr[] = {'|','+','*'};
+		 vector<char> allOperators (arr, arr + sizeof(arr) / sizeof(arr[0]) );
+
+		vector<char> binaryOperators('|');
+
+		for (int i = 0; i < regex.length(); i++) {
+
+			char c1 = regex.at(i);
+			if (i + 1 < regex.length()) {
+				char c2 = regex.at(i+1);
+
+				res += c1;
+
+				if (c1!='(' && c2!=')' && c2!='|' && c2!='*' && c2!='+' && c1!='|'&& c1!='/'&&c2!='L') {
+					res += ' ';
+				}
+//				cout<<c1<<" "<<c2<<endl;
+//				cout<<"res::"<<res<<endl;
+			}
+
+		}
+		res += regex.at(regex.length() - 1);
+
+		return res;
+	}
+	 	string RulesHandler::infixToPostfix(string regex) {
+		string postfix = "";
+
+		stack<char> mystack;
+
+		string formattedRegEx = formatRegEx(regex);
+
+		for (int i=0;i<regex.length();i++) {
+			switch (regex[i]) {
+				case '(':
+					mystack.push(regex[i]);
+					break;
+
+				case ')':
+					while(mystack.top() != '(') {
+						postfix += mystack.top();
+						mystack.pop();
+					}
+					mystack.pop();
+					break;
+
+				default:
+					while(mystack.size() > 0){
+						char peekedChar = mystack.top();
+
+						int peekedCharPrecedence = getPrecedence(peekedChar);
+						int currentCharPrecedence = getPrecedence(regex[i]);
+
+						if (peekedCharPrecedence >= currentCharPrecedence) {
+							postfix += mystack.top();
+							mystack.pop();
+						} else {
+							break;
+						}
+					}
+					mystack.push(regex[i]);
+					break;
+			}
+
+		}
+		while (mystack.size() > 0){
+			postfix += mystack.top();
+			mystack.pop();
+		}
+		return postfix;
+	}
 RulesHandler::~RulesHandler() {
 }
 
