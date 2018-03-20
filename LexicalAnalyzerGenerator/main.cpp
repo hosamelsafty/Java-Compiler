@@ -19,7 +19,7 @@ int main(int argc, char** argv)
     // TODO Convert NFA to DFA
     // input: TransitionTable
     // output: TransitionTable
-	NFATransitionTable nfa;
+	/*NFATransitionTable nfa;
     State q9(9);
     q9.setType(ACCEPTING);
     nfa.startingSet = set<State>{State(0)};
@@ -42,8 +42,32 @@ int main(int argc, char** argv)
         for(auto& pair : dfa.getMapping(st)){
             cout << "under: " << pair.first << " , it goes to: " << pair.second.getID() << endl ;
         }
+    }*/
+    State s0 = State(0);
+    s0.setType(STARTING);
+    State s1 = State(1);
+    s1.setType(ACCEPTING);
+    State s2 = State(2);
+    State s3 = State(3);
+    State s4 = State(4);
+    DFATransitionTable dfa;
+    dfa.add(s0, '0', s1);
+    dfa.add(s0, '1', s2);
+    dfa.add(s1, '0', s2);
+    dfa.add(s1, '1', s3);
+    dfa.add(s2, '0', s1);
+    dfa.add(s2, '1', s2);
+    dfa.add(s3, '0', s0);
+    dfa.add(s3, '1', s2);
+    dfa.add(s4, '0', s3);
+    dfa.add(s4, '1', s4);
+    DFATransitionTable min_dfa = minimizeDFA(dfa);
+    for(auto&st:min_dfa.getStates()){
+        cout << "State: " << st.getID() << " , Type: " << st.getType() << endl ;
+        for(auto& pair : min_dfa.getMapping(st)){
+            cout << "under: " << pair.first << " , it goes to: " << pair.second.getID() << endl ;
+        }
     }
-
     // TODO minimize DFA
     // input: TransitionTable
     // output: TransitionTable
