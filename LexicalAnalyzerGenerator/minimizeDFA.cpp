@@ -44,16 +44,21 @@ DFATransitionTable minimizeDFA(const DFATransitionTable &dfa)
         _states[i].setType(classes[i][0].first.getType());
     }
     for(int i = 0; i < no_states; i++){
-        int counter = 0;
-        for(char c = '0'; c <= '9'; c++){
+        std::map<char, State> trans = dfa.getMapping(classes[i][0].first);
+        for(auto& pair : trans){
+           // classes[i][j].second.push_back(findClass(classes, end, pair.second.getID()));
+            int class_id = findClass(classes, end, trans[pair.first].getID());
+            min_dfa.add(_states[i], pair.first, _states[class_id]);
+        }
+        /*for(char c = '0'; c <= '9'; c++){
             min_dfa.add(_states[i], c, _states[classes[i][0].second[counter++]]);
         }
-        for(char c = 'a'; c <= 'a'; c++){
+        for(char c = 'a'; c <= 'z'; c++){
             min_dfa.add(_states[i], c, _states[classes[i][0].second[counter++]]);
         }
         for(char c = 'A'; c <= 'Z'; c++){
             min_dfa.add(_states[i], c, _states[classes[i][0].second[counter++]]);
-        }
+        }*/
     }
 	return min_dfa;
 }
@@ -89,7 +94,10 @@ void matchStates(const DFATransitionTable &dfa, std::vector<std::vector<std::pai
         unsigned long long int n = classes[i].size();
         for(int j = 0; j < n; j++){
             std::map<char, State> trans = dfa.getMapping(classes[i][j].first);
-            for(char c = '0'; c <= '9'; c++){
+            for(auto& pair : trans){
+                classes[i][j].second.push_back(findClass(classes, end, pair.second.getID()));
+            }
+           /* for(char c = '0'; c <= '9'; c++){
                 State s = trans[c];
                 classes[i][j].second.push_back(findClass(classes, end, s.getID()));
             }
@@ -101,6 +109,7 @@ void matchStates(const DFATransitionTable &dfa, std::vector<std::vector<std::pai
                 State s = trans[c];
                 classes[i][j].second.push_back(findClass(classes, end, s.getID()));
             }
+            */
         }
     }
 }
