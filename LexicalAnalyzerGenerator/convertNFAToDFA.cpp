@@ -32,8 +32,14 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
         {
             if(map.find(pair.second) == map.end()){
                 State newState(newStateId++);
+
+                if(isAcceptance(pair.second)){
+                    newState.setType(ACCEPTING);
+                }
+
                 if(isAcceptance(pair.second))
                     newState.setType(ACCEPTING);
+
                 map[pair.second] = newState;
                 workingSet.push(pair.second);
             }

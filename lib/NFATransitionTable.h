@@ -21,9 +21,9 @@ public:
     std::set<State> nextStates(const std::set<State> &currentStates, char input) const;
 	std::map<char, std::set<State> > getMapping(const std::set<State> &currentStates) const;
 	std::set<State> getStartingSet() const;
+	std::set<State> startingSet;
 
 private:
-    std::set<State> startingSet;
 	struct impl;
 	std::unique_ptr<impl> m_d;
 };
