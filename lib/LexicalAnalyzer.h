@@ -1,7 +1,7 @@
 #ifndef LexicalAnalyzer_H
 #define LexicalAnalyzer_H
 
-#include "TransitionTable.h"
+#include "DFATransitionTable.h"
 #include "Token.h"
 
 #include <iostream>
@@ -11,7 +11,7 @@ class ErrorLog;
 class LexicalAnalyzer
 {
 public:
-    LexicalAnalyzer(const TransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog);
+    LexicalAnalyzer(const DFATransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog);
     ~LexicalAnalyzer();
 
     Token nextToken();

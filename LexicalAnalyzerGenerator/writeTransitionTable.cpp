@@ -1,7 +1,7 @@
 #include "writeTransitionTable.h"
 #include <fstream>
 
-void writeTransitionTable(const TransitionTable &dfa, const std::string &filename)
+void writeTransitionTable(const DFATransitionTable &dfa, const std::string &filename)
 {
 	std::ofstream file;
 	file.open(filename);

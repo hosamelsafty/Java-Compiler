@@ -2,8 +2,8 @@
 #define writeTransitionTable_H
 
 #include <string>
-#include "lib/TransitionTable.h"
+#include "lib/DFATransitionTable.h"
 
-void writeTransitionTable(const TransitionTable &dfa, const std::string &filename);
+void writeTransitionTable(const DFATransitionTable &dfa, const std::string &filename);
 
 #endif // writeTransitionTable_H

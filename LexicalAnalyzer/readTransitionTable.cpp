@@ -2,9 +2,9 @@
 
 #include <fstream>
 
-TransitionTable readTransitionTable(const std::string &filename)
+DFATransitionTable readTransitionTable(const std::string &filename)
 {
-	TransitionTable transitionTable;
+	DFATransitionTable transitionTable;
 	std::ifstream file;
 	file.open(filename);
 	file >> transitionTable;
