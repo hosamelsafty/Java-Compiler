@@ -132,8 +132,8 @@ void RulesHandler::init_rules() {
 	  edit_expression_from_definition();
 		for (int i = 0; i < regExp.size(); ++i) {
 //			cout<<"before::"<<regExp[i].second<<endl;
-			regExp[i].second=formatRegEx(regExp[i].second);
-			cout<<"after::"<<regExp[i].second<<endl;
+			regExp[i].second=infixToPostfix(regExp[i].second);
+//			cout<<"after::"<<regExp[i].second<<endl;
 		}
 }
 void RulesHandler::replaceAll(std::string& str, const std::string& from, const std::string& to) {
@@ -235,17 +235,17 @@ int  RulesHandler::getPrecedence(char c){
 
 		return res;
 	}
-	 	string RulesHandler::infixToPostfix(string regex) {
+	 string RulesHandler::infixToPostfix(string regex) {
 		string postfix = "";
 
 		stack<char> mystack;
 
 		string formattedRegEx = formatRegEx(regex);
 
-		for (int i=0;i<regex.length();i++) {
-			switch (regex[i]) {
+		for (int i=0;i<formattedRegEx.length();i++) {
+			switch (formattedRegEx[i]) {
 				case '(':
-					mystack.push(regex[i]);
+					mystack.push(formattedRegEx[i]);
 					break;
 
 				case ')':
@@ -261,7 +261,7 @@ int  RulesHandler::getPrecedence(char c){
 						char peekedChar = mystack.top();
 
 						int peekedCharPrecedence = getPrecedence(peekedChar);
-						int currentCharPrecedence = getPrecedence(regex[i]);
+						int currentCharPrecedence = getPrecedence(formattedRegEx[i]);
 
 						if (peekedCharPrecedence >= currentCharPrecedence) {
 							postfix += mystack.top();
@@ -270,7 +270,7 @@ int  RulesHandler::getPrecedence(char c){
 							break;
 						}
 					}
-					mystack.push(regex[i]);
+					mystack.push(formattedRegEx[i]);
 					break;
 			}
 

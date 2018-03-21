@@ -21,7 +21,8 @@ public:
     std::set<State> nextStates(const std::set<State> &currentStates, char input) const;
 	std::map<char, std::set<State> > getMapping(const std::set<State> &currentStates) const;
 	std::set<State> getStartingSet() const;
-	std::set<State> startingSet;
+	 std::set<State> startingSet;
+	 std::set<State> endingSet;
 
 private:
 	struct impl;

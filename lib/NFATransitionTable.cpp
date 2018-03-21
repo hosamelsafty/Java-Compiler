@@ -6,13 +6,11 @@ struct NFATransitionTable::impl
 };
 
 NFATransitionTable::NFATransitionTable()
-	: m_d(std::make_unique<impl>())
 {
 
 }
 
 NFATransitionTable::NFATransitionTable(const NFATransitionTable & t)
-	: m_d(std::make_unique<impl>())
 {
 	m_d->table = t.m_d->table;
 }

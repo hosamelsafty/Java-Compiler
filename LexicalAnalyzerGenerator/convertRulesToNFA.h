@@ -2,12 +2,13 @@
 #define convertRulesToNFA_H
 
 #include <string>
-<<<<<<< HEAD
-#include "TransitionTable.h"
-=======
-#include "lib/NFATransitionTable.h"
->>>>>>> 6ba43079a8ba85c427d76e42eb900c70cd03d05e
+#include "NFATransitionTable.h"
 
 NFATransitionTable convertRulesToNFA(const std::string &filename);
-
+NFATransitionTable constructPrimitiveNFA(const std::string s);
+NFATransitionTable Union(NFATransitionTable nfa1,NFATransitionTable nfa2);
+NFATransitionTable Concat(NFATransitionTable nfa1,NFATransitionTable nfa2);
+NFATransitionTable Star(NFATransitionTable nfa);
+NFATransitionTable Plus(NFATransitionTable nfa);
+NFATransitionTable MultiUnion(NFATransitionTable nfas[] );
 #endif // convertRulesToNFA_H
