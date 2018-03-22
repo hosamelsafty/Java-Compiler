@@ -11,7 +11,10 @@ struct NFATransitionTable::impl
 
 	std::set<State> startingStates;
 	std::set<State> endingStates;
+
+	std::set<State> directClosure(const State &state, char input) const;
 };
+
 
 NFATransitionTable::NFATransitionTable()
 	: m_d(std::make_unique<impl>())
@@ -19,10 +22,14 @@ NFATransitionTable::NFATransitionTable()
 
 }
 
-NFATransitionTable::NFATransitionTable(const NFATransitionTable & t)
+NFATransitionTable::NFATransitionTable(const NFATransitionTable & nfa)
 	: m_d(std::make_unique<impl>())
 {
-	// TODO
+	m_d->transitions = nfa.m_d->transitions;
+	m_d->fromIndex = nfa.m_d->fromIndex;
+	m_d->toIndex = nfa.m_d->toIndex;
+	m_d->startingStates = nfa.m_d->startingStates;
+	m_d->endingStates = nfa.m_d->endingStates;
 }
 
 NFATransitionTable::~NFATransitionTable()
@@ -32,7 +39,11 @@ NFATransitionTable::~NFATransitionTable()
 
 const NFATransitionTable & NFATransitionTable::operator=(const NFATransitionTable &nfa)
 {
-	// TODO
+	m_d->transitions = nfa.m_d->transitions;
+	m_d->fromIndex = nfa.m_d->fromIndex;
+	m_d->toIndex = nfa.m_d->toIndex;
+	m_d->startingStates = nfa.m_d->startingStates;
+	m_d->endingStates = nfa.m_d->endingStates;
 }
 
 void NFATransitionTable::setTransition(const State &fromState, NFATransitionTable::Input input, const State &toState)
@@ -41,7 +52,7 @@ void NFATransitionTable::setTransition(const State &fromState, NFATransitionTabl
 	std::set<int> fromIndicies = m_d->toIndex[toState];
 	std::set<int> possibleCollision;
 	set_intersection(fromIndicies.begin(), fromIndicies.end(), fromIndicies.begin(), fromIndicies.end(),
-		std::inserter(possibleCollision, possibleCollision.begin()));
+	std::inserter(possibleCollision, possibleCollision.begin()));
 
 	for (int i : possibleCollision)
 	{
@@ -64,16 +75,79 @@ std::vector<NFATransitionTable::Transition> NFATransitionTable::getAllTransition
 	return m_d->transitions;
 }
 
+std::set<State> NFATransitionTable::impl::directClosure(const State &state, char input) const
+{
+	std::set<State> states;
+
+	std::set<int> fromIndicies = fromIndex[state];
+
+	for (int i : fromIndicies)
+	{
+		if (std::get<1>(transitions[i]) == input)
+		{
+			states.insert(std::get<2>(transitions[i]));
+		}
+	}
+	return states;
+}
+
 std::set<State> NFATransitionTable::epsClosure(const State &state) const
 {
+	std::set<State> resultColsure;
+	resultColsure.insert(state);
 
+	std::set<State> toBeProcessed;
+	std::set<State> doneProcessing;
+
+	toBeProcessed.insert(state);
+
+	while (toBeProcessed.size())
+	{
+		std::set<State> directClosure = m_d->directClosure(*toBeProcessed.begin(), EPS);
+		resultColsure.insert(directClosure.begin(), directClosure.end());
+		
+		doneProcessing.insert(*toBeProcessed.begin());
+		toBeProcessed.erase(*toBeProcessed.begin());
+
+		std::set<State> newInClosure;
+
+		std::set_difference(directClosure.begin(), directClosure.end(), doneProcessing.begin(), doneProcessing.end(),
+			std::inserter(newInClosure, newInClosure.begin()));
+
+		if (newInClosure.size())
+		{
+			toBeProcessed.insert(newInClosure.begin(), newInClosure.end());
+		}
+	}
+
+	return resultColsure;
 }
+
 std::set<State> NFATransitionTable::epsClosure(const std::set<State> &states) const
 {
+	std::set<State> resultClosure;
 
+	for (auto && state : states)
+	{
+		// This is not efficient but correct
+		std::set<State> closure = epsClosure(state);
+		resultClosure.insert(closure.begin(), closure.end());
+	}
+
+	return resultClosure;
 }
+
 std::set<State> NFATransitionTable::move(const std::set<State> &states, char input) const
 {
+	std::set<State> directClosureOfinput;
+
+	for (auto && state : states)
+	{
+		std::set<State> closure = m_d->directClosure(state, input);
+		directClosureOfinput.insert(closure.begin(), closure.end());
+	}
+
+	return epsClosure(directClosureOfinput);
 
 }
 

@@ -14,10 +14,12 @@
 class NFATransitionTable
 {
 public:
+	// This is better be implemented as std::optiona (C++17) or Boost::optional
 	typedef char Input;
 
-	// TODO epsilon symbol need to be defined
-	static const char EPS;
+	// Epsilon symbol need to be defined
+	// (device control 1) This is a control character that is not likely to exist in a file
+	static const char EPS = '\17';
 
 	typedef std::tuple<State, Input, State> Transition;
 
