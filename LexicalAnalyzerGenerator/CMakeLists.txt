@@ -16,4 +16,4 @@ file(GLOB here_SRC
     "*.cpp"
 )
 
-add_executable(LexicalAnalyzerGenerator ${here_SRC} ${lib_SRC} ${rapidjson_SRC})
+add_executable(LexicalAnalyzerGenerator ${here_SRC} ${lib_SRC} ${rapidjson_SRC} RulesHandler.cpp RulesHandler.h)
