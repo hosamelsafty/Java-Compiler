@@ -123,6 +123,7 @@ void RulesHandler::init_rules() {
     edit_expression_from_definition();
     for (int i = 0; i < regExp.size(); ++i) {
         regExp[i].second=infixToPostfix(regExp[i].second);
+        cout<< regExp[i].second<<endl;
     }
 }
 void RulesHandler::replaceAll(std::string& str, const std::string& from, const std::string& to) {

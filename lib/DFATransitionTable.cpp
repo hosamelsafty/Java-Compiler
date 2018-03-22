@@ -33,6 +33,15 @@ State DFATransitionTable::nextState(const State &currentState, char input) const
     return m_d->table[currentState][input];
 }
 
+State* DFATransitionTable::tryNextState(const State &currentState, char input) const
+{
+    auto res = m_d->table[currentState].find(input);
+    if(res != m_d->table[currentState].end()){
+        return &res->second;
+    }
+    return  NULL;
+
+}
 std::vector<State> DFATransitionTable::getStates() const
 {
     std::vector<State> keys;

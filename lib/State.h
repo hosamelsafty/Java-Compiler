@@ -21,6 +21,7 @@ public:
 	static int newID(){
 		return new_id++;
 	}
+	const State &operator=(const State &s);
 };
 
 bool operator == (const State &lhs, const State &rhs);

@@ -6,9 +6,6 @@
 
 NFATransitionTable convertRulesToNFA(const std::string &filename);
 NFATransitionTable constructPrimitiveNFA(const std::string s);
-NFATransitionTable Union(NFATransitionTable nfa1,NFATransitionTable nfa2);
-NFATransitionTable Concat(NFATransitionTable nfa1,NFATransitionTable nfa2);
-NFATransitionTable Star(NFATransitionTable nfa);
-NFATransitionTable Plus(NFATransitionTable nfa);
-NFATransitionTable MultiUnion(NFATransitionTable nfas[] );
+NFATransitionTable MultiUnion(std::vector<NFATransitionTable> nfas);
+
 #endif // convertRulesToNFA_H

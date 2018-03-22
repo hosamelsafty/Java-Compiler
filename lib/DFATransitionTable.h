@@ -20,6 +20,8 @@ public:
     State nextState(const State &, char input) const;
     std::vector<State> getStates() const;
     std::map<char,State> getMapping(const State&) const;
+    State * tryNextState(const State &currentState, char input) const;
+    State startingState;
 
 private:
     struct impl;

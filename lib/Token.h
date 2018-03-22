@@ -7,8 +7,13 @@ class Token
 {
 public:
     string type,value;
-    Token(string t,string v);
-    virtual ~Token();
+    Token(string t,string v){
+        type = t;
+        value = v;
+    };
+    virtual ~Token(){
+
+    };
 };
 
 #endif // Token_H
