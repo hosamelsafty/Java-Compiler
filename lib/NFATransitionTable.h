@@ -30,6 +30,7 @@ public:
 	const NFATransitionTable &operator=(const NFATransitionTable &nfa);
 
 	void setTransition(const State &fromState, Input input, const State &toState);
+	void setTransition(const Transition &transition);
 
 	std::vector<Transition> getAllTransitions() const;
 

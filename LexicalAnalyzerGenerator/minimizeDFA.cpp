@@ -52,7 +52,7 @@ DFATransitionTable minimizeDFA(const DFATransitionTable &dfa) {
     matchStates(dfa, classes);
     DFATransitionTable min_dfa;
     unsigned long long int no_states = classes.size();
-    State _states[no_states];
+	std::vector<State> _states(no_states); // [no_states];
     for (int i = 0; i < no_states; i++) {
         _states[i] = State(i);
         _states[i].setType(classes[i][0].first.getType());

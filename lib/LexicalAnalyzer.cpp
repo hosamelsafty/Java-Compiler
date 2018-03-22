@@ -3,7 +3,7 @@
 #include <sstream>
 
 LexicalAnalyzer::LexicalAnalyzer(
-		DFATransitionTable &transitionTable, std::istream& in) :
+		DFATransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog) :
 		input(in), dfa_t(transitionTable) {
 	remainingInput = "";
 }

@@ -25,7 +25,10 @@ bool operator<(const State &lhs, const State &rhs)
 	return lhs.getID() < rhs.getID();
 }
 
-const State  &State::operator=(const State &s){
+const State &State::operator=(const State &s)
+{
 	id = s.getID();
 	type = s.getType();
+
+	return *this;
 }

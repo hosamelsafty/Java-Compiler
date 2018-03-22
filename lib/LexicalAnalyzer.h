@@ -12,7 +12,7 @@ class LexicalAnalyzer
 {
 public:
 //    LexicalAnalyzer(DFATransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog);
-    LexicalAnalyzer(DFATransitionTable &transitionTable, std::istream& in);
+    LexicalAnalyzer(DFATransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog);
     ~LexicalAnalyzer();
     Token* nextToken();
 private:

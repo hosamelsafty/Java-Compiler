@@ -1,7 +1,8 @@
 #ifndef State_H
 #define State_H
 
-enum Type{
+enum Type
+{
 	REGULAR,
 	STARTING,
 	ACCEPTING,
@@ -15,13 +16,18 @@ class State
 public:
 	State(){};
     State(int number);
+
+	int getID() const;
+
 	void setType(Type t);
 	Type getType() const;
-	int getID() const;
-	static int newID(){
+
+	const State &operator=(const State &s);
+
+	static int newID()
+	{
 		return new_id++;
 	}
-	const State &operator=(const State &s);
 };
 
 bool operator == (const State &lhs, const State &rhs);
