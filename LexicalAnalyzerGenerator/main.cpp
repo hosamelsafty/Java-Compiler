@@ -12,8 +12,15 @@ int main(int argc, char** argv)
     using namespace std;
 
     // This is Tested ##
-    NFATransitionTable nfa = convertRulesToNFA("C:/Users/win8.1/Desktop/compiler/javacompiler/domx.txt");
+    NFATransitionTable nfa = convertRulesToNFA("rules.txt");
+
     DFATransitionTable dfa = convertNFAToDFA(nfa);
+
+	DFATransitionTable minDfa = minimizeDFA(dfa);
+
+	std::string outputFilename = "dfa.json";
+	writeTransitionTable(minDfa, outputFilename);
+
 
     // TODO Read Rules file and convert to NFA
     // input: filename
