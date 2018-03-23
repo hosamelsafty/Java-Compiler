@@ -16,14 +16,9 @@ Type State::getType() const { return type; }
 
 int State::getID()const  { return id;}
 
-bool State::operator==(const State & s)
+bool State::operator==(const State & s) const
 {
 	return id == s.getID();
-}
-
-bool State::operator()(const State &s)
-{
-	return s.getID() == id;
 }
 
 bool operator<(const State &lhs, const State &rhs)

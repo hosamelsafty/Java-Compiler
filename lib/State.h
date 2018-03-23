@@ -21,8 +21,7 @@ public:
 	Type getType() const;
 
 	const State &operator=(const State &s);
-	bool operator() (const State &s);
-	bool operator==(const State & s);
+	bool operator==(const State & s) const;
 	static int newID()
 	{
 		return new_id++;

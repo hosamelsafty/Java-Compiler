@@ -83,6 +83,15 @@ void DFATransitionTable::addAcceptingState(const State &state)
 	m_d->endingStates.insert(state);
 }
 
+bool DFATransitionTable::isAcceptingState(const State &state) const
+{
+	for (auto& i : m_d->endingStates){
+		if (i == state)
+			return true;
+	}
+	return false;
+}
+
 State DFATransitionTable::getStartingState() const
 {
 	return m_d->startingState;

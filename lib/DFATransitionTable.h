@@ -29,6 +29,7 @@ public:
 	void setAcceptingStates(const std::set<State> &states);
 	void addAcceptingState(const State &state);
 
+	bool isAcceptingState (const State &state) const;
 	State getStartingState() const;
 	std::set<State> getAcceptingStates() const;
 
