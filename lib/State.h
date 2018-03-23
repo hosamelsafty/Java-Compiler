@@ -21,14 +21,13 @@ public:
 	Type getType() const;
 
 	const State &operator=(const State &s);
-
+	bool operator() (const State &s);
+	bool operator==(const State & s);
 	static int newID()
 	{
 		return new_id++;
 	}
 };
-
-bool operator == (const State &lhs, const State &rhs);
 bool operator<(const State &lhs, const State &rhs);
 
 #endif // State_H

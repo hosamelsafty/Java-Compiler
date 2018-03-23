@@ -13,6 +13,9 @@
 
 struct DFATransitionTable::impl
 {
+	State startingState;
+	std::set<State> endingStates;
+
     std::map < State, std::map<char, State > > table;
 };
 
@@ -43,15 +46,12 @@ State DFATransitionTable::nextState(const State &currentState, char input) const
     return m_d->table[currentState][input];
 }
 
-State* DFATransitionTable::tryNextState(const State &currentState, char input) const
+bool DFATransitionTable::checkTransition (const State &currentState, char input) const
 {
-    auto res = m_d->table[currentState].find(input);
-    if(res != m_d->table[currentState].end()){
-        return &res->second;
-    }
-    return  NULL;
-
+	std::map<char, State> table = m_d->table[currentState];
+	return table.find(input) != table.end();
 }
+
 std::vector<State> DFATransitionTable::getStates() const
 {
     std::vector<State> keys;
@@ -66,6 +66,33 @@ std::map<char,State> DFATransitionTable::getMapping(const State& state) const
 {
     return m_d->table[state];
 }
+
+void DFATransitionTable::setStartingState(const State &state)
+{
+	m_d->startingState = state;
+}
+
+
+void DFATransitionTable::setAcceptingStates(const std::set<State> &states)
+{
+	m_d->endingStates = states;
+}
+
+void DFATransitionTable::addAcceptingState(const State &state)
+{
+	m_d->endingStates.insert(state);
+}
+
+State DFATransitionTable::getStartingState() const
+{
+	return m_d->startingState;
+}
+
+std::set<State> DFATransitionTable::getAcceptingStates() const
+{
+	return m_d->endingStates;
+}
+
 
 std::ostream& operator<<(std::ostream& out, const DFATransitionTable &transitionTable)
 {

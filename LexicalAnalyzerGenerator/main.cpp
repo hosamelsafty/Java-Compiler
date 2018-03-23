@@ -4,22 +4,23 @@
 #include "writeTransitionTable.h"
 
 #include "lib/NFATransitionTable.h"
-
+#include "lib/LexicalAnalyzer.h"
 #include <string>
+#include <sstream>
 
 int main(int argc, char** argv)
 {
     using namespace std;
 
     // This is Tested ##
-    NFATransitionTable nfa = convertRulesToNFA("rules.txt");
-
-    DFATransitionTable dfa = convertNFAToDFA(nfa);
-
-	DFATransitionTable minDfa = minimizeDFA(dfa);
-
-	std::string outputFilename = "dfa.json";
-	writeTransitionTable(minDfa, outputFilename);
+//    NFATransitionTable nfa = convertRulesToNFA("rules.txt");
+//
+//    DFATransitionTable dfa = convertNFAToDFA(nfa);
+//
+//	DFATransitionTable minDfa = minimizeDFA(dfa);
+//
+//	std::string outputFilename = "dfa.json";
+//	writeTransitionTable(minDfa, outputFilename);
 
 
     // TODO Read Rules file and convert to NFA
@@ -55,7 +56,7 @@ int main(int argc, char** argv)
         }
     }*/
     //Rule
-    /*State s0 = State(0);
+    State s0 = State(0);
     s0.setType(STARTING);
     State s1 = State(1);
     s1.setType(ACCEPTING);
@@ -63,6 +64,8 @@ int main(int argc, char** argv)
     State s3 = State(3);
     State s4 = State(4);
     DFATransitionTable dfa;
+    dfa.setStartingState(s0);
+    dfa.addAcceptingState(s1);
     dfa.add(s0, '0', s1);
     dfa.add(s0, '1', s2);
     dfa.add(s1, '0', s2);
@@ -79,7 +82,23 @@ int main(int argc, char** argv)
         for(auto& pair : min_dfa.getMapping(st)){
             cout << "under: " << pair.first << " , it goes to: " << pair.second.getID() << endl ;
         }
-    }*/
+    }
+
+	/*small test for lexical.*/
+	istringstream ss;
+	string string1 = "0111001001101";
+	ss.str(string1);
+	LexicalAnalyzer la(dfa, ss);
+	Token* t = la.nextToken();
+	cout << "lasttoken >>> " << t->value << " " << t->type
+			<< endl;
+	t = la.nextToken();
+	if (t)
+		cout << "lasttoken >>> " << t->value << " "
+				<< t->type << endl;
+	ss.clear();
+
+
     // TODO minimize DFA
     // input: TransitionTable
     // output: TransitionTable

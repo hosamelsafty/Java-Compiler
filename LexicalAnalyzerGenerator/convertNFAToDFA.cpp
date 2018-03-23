@@ -25,6 +25,7 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
     DFATransitionTable DFA;
     State startState(newStateId++);
     startState.setType(STARTING);
+    DFA.setStartingState(startState); // edited by Omar Kassem
     map[startSet] = startState;
     while(!workingSet.empty())
     {
@@ -42,8 +43,10 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
             if(map.find(pair.second) == map.end()){ // A new set is found
                 // make a new DFA representative state of the NFA set
                 State newState(newStateId++);
-                if(isAccepting(pair.second))
+                if(isAccepting(pair.second)) {
                     newState.setType(ACCEPTING);
+                    DFA.addAcceptingState (newState); 	// edited by Omar Kassem
+                 }
                 map[pair.second] = newState;
                 workingSet.push(pair.second);
             }

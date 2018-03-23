@@ -3,10 +3,18 @@
 #include <sstream>
 
 LexicalAnalyzer::LexicalAnalyzer(
-		DFATransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog) :
+		DFATransitionTable &transitionTable, std::istream& in,
+		ErrorLog &errorLog) :
 		input(in), dfa_t(transitionTable) {
 	remainingInput = "";
 }
+
+LexicalAnalyzer::LexicalAnalyzer(
+		DFATransitionTable &transitionTable, std::istream& in) :
+		input(in), dfa_t(transitionTable) {
+	remainingInput = "";
+}
+
 LexicalAnalyzer::~LexicalAnalyzer() {
 
 }
@@ -15,19 +23,22 @@ Token* LexicalAnalyzer::getToken(std::istream& io) {
 	std::string lexem = "";
 	int indx = 0, lastAccIndx;
 	char c;
-	State currState = dfa_t.startingState;
+	State currState = dfa_t.getStartingState();
 	State* lastAcceptedState = NULL;
+	State nextState;
 	while (io.peek() != EOF && io.get(c)) { // loop getting single characters
-		State* nextState = dfa_t.tryNextState(currState, c);
-		if (nextState) { // a transition found.
+		if (dfa_t.checkTransition(currState, c)) { // a transition found.
+			nextState = dfa_t.nextState(currState, c);
 			indx++;
 			lexem += c;
-			std::cout << lexem << std::endl;
-			if (nextState->getType() == ACCEPTING) {
-				lastAcceptedState = nextState;
-				lastAccIndx = indx;
+			for (auto& i : dfa_t.getAcceptingStates()) {
+				if (nextState == i) {
+					lastAcceptedState = &nextState;
+					lastAccIndx = indx;
+					break;
+				}
 			}
-			currState = *nextState;
+			currState = nextState;
 		} else { // no transition found.
 			break;
 		}
@@ -38,17 +49,17 @@ Token* LexicalAnalyzer::getToken(std::istream& io) {
 		return NULL;
 	}
 	remainingInput = lexem.substr(lastAccIndx,
-								  lexem.size() - lastAccIndx);
+			lexem.size() - lastAccIndx);
 	Token* t = new Token("Token1", lexem.substr(0, lastAccIndx));
 	return t;
 }
 Token* LexicalAnalyzer::nextToken() {
 	Token* token;
-	if(remainingInput.empty()){
+	if (!remainingInput.empty()) {
 		std::istringstream ss;
 		ss.str(remainingInput);
 		token = getToken(ss);
-	}else{
+	} else {
 		token = getToken(input);
 	}
 	return token;

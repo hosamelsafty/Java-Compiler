@@ -11,14 +11,14 @@ class ErrorLog;
 class LexicalAnalyzer
 {
 public:
-//    LexicalAnalyzer(DFATransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog);
     LexicalAnalyzer(DFATransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog);
+    LexicalAnalyzer(DFATransitionTable &transitionTable, std::istream& in); // for debugging purpose.
     ~LexicalAnalyzer();
     Token* nextToken();
 private:
     Token* getToken(std::istream&);
     std::istream& input;
-//    ErrorLog& errLog;
+//    ErrorLog& errLog; // for debugging purpose.
     DFATransitionTable& dfa_t;
     std::string remainingInput;
 };
