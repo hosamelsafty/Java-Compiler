@@ -9,16 +9,14 @@ using namespace std;
 
 NFATransitionTable convertRulesToNFA(const std::string &filename)
 {
-	RulesHandler rules;
+	RulesHandler rules(filename);
 	rules.init_rules();
 	int size = rules.regExp.size();
 	vector<NFATransitionTable> nfas;
 	for (int i = 0; i < size; ++i) {
 		string postfix = rules.regExp[i].second;
-		nfas[i] = constructPrimitiveNFA(postfix);
-//		cout<<nfas[i].startingSet<<endl;
+		nfas.push_back(constructPrimitiveNFA(postfix));
 	}
-
 	return MultiUnion(nfas);
 }
 
@@ -32,12 +30,14 @@ NFATransitionTable constructPrimitiveNFA(string s){
 	for (int i = 0; i < s.length(); ++i) {
 
 		if(!is_operator(s[i])){
+            if(s[i] == '\\')
+                i++;
 			NFATransitionTable nfa ;
 			State start(State::newID());
 			start.setType(STARTING);
 			State end(State::newID());
 			end.setType(ACCEPTING);
-            nfa.setStartingStates(set<State>{});
+            nfa.setStartingStates(set<State>{start});
 			nfa.setAcceptingStates(set<State>{end});
 			nfa.setTransition(start, s[i], end);
 			stack.push(nfa);
@@ -70,12 +70,12 @@ NFATransitionTable constructPrimitiveNFA(string s){
 		}
 	}
 
-	return NFATransitionTable();
+	return stack.top();
 
 }
 
 NFATransitionTable MultiUnion(vector<NFATransitionTable> nfas){
-    NFATransitionTable newNFA;
+    /*NFATransitionTable newNFA;
     State startState(State::newID());
     newNFA.setStartingStates(set<State>{startState});
 
@@ -89,6 +89,13 @@ NFATransitionTable MultiUnion(vector<NFATransitionTable> nfas){
             newNFA.setTransition(startState,'\0', elem);
         }
     }
-
-    return newNFA;
+    */
+    while(nfas.size() >=2){
+        NFATransitionTable nfa1 = nfas.front();
+        nfas.pop_back();
+        NFATransitionTable nfa2 = nfas.front();
+        nfas.pop_back();
+        nfas.push_back(nfa1.opUnion(nfa2));
+    }
+    return nfas.front();
 }

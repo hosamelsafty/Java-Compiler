@@ -15,19 +15,29 @@ bool isAccepting(std::set<State> s){
 /* Returns a new DFA from an input NFA */
 DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
 {
+    set<State> startSet = nfa.epsClosure(nfa.getStartingStates());
+
     map<set<State>,State> map;
     queue<set<State>> workingSet;
-    workingSet.push(nfa.getStartingStates());
-    DFATransitionTable DFA;
+    workingSet.push(startSet);
+
     int newStateId = 0;
+    DFATransitionTable DFA;
     State startState(newStateId++);
     startState.setType(STARTING);
-    map[nfa.getStartingStates()] = startState;
-    /*while(!workingSet.empty())
+    map[startSet] = startState;
+    while(!workingSet.empty())
     {
         set<State> s = workingSet.front();
         workingSet.pop();
-        for (auto& pair : nfa.getMapping(s))
+        // TODO:: for every possible input I
+           // t = e-closure(move(s,I))
+           // if t is not in map
+              // ns = newState
+              // map[t] = ns
+           // DFA[s,I] = map[t]
+
+        /*for (auto& pair : nfa.getMapping(s))
         {
             if(map.find(pair.second) == map.end()){ // A new set is found
                 // make a new DFA representative state of the NFA set
@@ -38,7 +48,8 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
                 workingSet.push(pair.second);
             }
             DFA.add(map[s],pair.first,map[pair.second]);
-        }
-    }*/
+        }*/
+    }
+
     return DFA;
 }

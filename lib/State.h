@@ -16,9 +16,7 @@ class State
 public:
 	State(){};
     State(int number);
-
 	int getID() const;
-
 	void setType(Type t);
 	Type getType() const;
 

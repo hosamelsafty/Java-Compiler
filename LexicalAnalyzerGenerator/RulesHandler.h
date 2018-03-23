@@ -14,8 +14,9 @@
 using namespace std;
 
 class RulesHandler {
+    string fileName;
 public:
-    RulesHandler();
+    RulesHandler(const std::string &filename);
     vector<pair<string,string > >regExp;
     vector<pair<string,string > > regDef;
     vector<string>punc;

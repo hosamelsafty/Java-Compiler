@@ -17,8 +17,8 @@
 
 
 using namespace std;
-RulesHandler::RulesHandler() {
-
+RulesHandler::RulesHandler(const std::string &filename)
+    : fileName(filename)  {
 }
 
 // trim from start
@@ -76,10 +76,12 @@ size_t RulesHandler::split(const std::string &txt, std::vector<std::string> &str
 /* Main method that do all parsing before generating NFA and initialise all lists. */
 void RulesHandler::init_rules() {
     string line;
-    ifstream myfile ("domx.txt");
-    if(!myfile.is_open())  cout << "Unable to open file";
-    getline (myfile,line) ;
-    while(line!=""){
+    ifstream file (fileName);
+    if(!file.is_open()){
+        cout << "Unable to open file";
+        return;
+    }
+    while(getline (file,line)){
         if(line.at(0)=='['){
             line=line.substr(1,line.length()-2);
             trim(line);
@@ -94,10 +96,7 @@ void RulesHandler::init_rules() {
         }
         else{
             replaceAll(line, " ", "");
-            replaceAll(line, "\\+", "+");
             replaceAll(line, "\\=", "=");
-            replaceAll(line, "\\*", "*");
-
             for (int i = 0; i < line.length(); ++i) {
                 if(line.at(i)==':'){
                     pair <string,string> temp (line.substr(0,i),line.substr(i+1,line.length()));
@@ -116,14 +115,13 @@ void RulesHandler::init_rules() {
             }
 
         }
-        getline (myfile,line) ;
     }
-    myfile.close();
+    file.close();
 
     edit_expression_from_definition();
     for (int i = 0; i < regExp.size(); ++i) {
         regExp[i].second=infixToPostfix(regExp[i].second);
-        cout<< regExp[i].second<<endl;
+        cout<< regExp[i].first << " :" << regExp[i].second << endl;
     }
 }
 void RulesHandler::replaceAll(std::string& str, const std::string& from, const std::string& to) {
@@ -211,7 +209,8 @@ string RulesHandler::formatRegEx(string regex) {
 
             res += c1;
 
-            if (c1!='(' && c2!=')' && c2!='|' && c2!='*' && c2!='+' && c1!='|'&& c1!='/'&&c2!='L') {
+            if (c1!='(' && c2!=')' && c2!='|' && c2!='*' &&
+                c2!='+' && c1!='|'&& c1!='/'&& c2!='L' && c2!='+' && c2!='*') {
                 res += ' ';
             }
         }

@@ -274,15 +274,17 @@ NFATransitionTable NFATransitionTable::opConcat(const NFATransitionTable &rhs) c
 	State startingStateRHS = *rhs.m_d->startingStates.begin();
 	for (auto && transition : rhs.m_d->transitions)
 	{
-		if (std::get<0>(transition) == startingStateRHS)
+        result.setTransition(transition);
+		/*if (std::get<0>(transition) == startingStateRHS)
 		{
 			result.setTransition(Transition(endingStateThis, std::get<1>(transition), std::get<2>(transition)));
 		}
 		else
 		{
 			result.setTransition(transition);
-		}
+		}*/
 	}
+    result.setTransition(endingStateThis,EPS,startingStateRHS);
 
 	// TODO Set startingState of result to be the starting state of *this.
 	result.setStartingStates(m_d->startingStates);
@@ -290,16 +292,12 @@ NFATransitionTable NFATransitionTable::opConcat(const NFATransitionTable &rhs) c
 	
 	// TODO Set endingState of result to be the ending state of rhs.
 	result.setAcceptingStates(rhs.m_d->endingStates);
-
 	return result;
 }
 
 NFATransitionTable NFATransitionTable::opPlus() const
 {
 	// *this must have one endingState and rhs must have one starting state.
-	assert(m_d->startingStates.size() == 1);
-	assert(m_d->endingStates.size() == 1);
-	
 	NFATransitionTable result = (*this).opConcat((*this).opStar());
 
 	return result;

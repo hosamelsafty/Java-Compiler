@@ -11,6 +11,10 @@ int main(int argc, char** argv)
 {
     using namespace std;
 
+    // This is Tested ##
+    NFATransitionTable nfa = convertRulesToNFA("C:/Users/win8.1/Desktop/compiler/javacompiler/domx.txt");
+    DFATransitionTable dfa = convertNFAToDFA(nfa);
+
     // TODO Read Rules file and convert to NFA
     // input: filename
     // output: TransitionTable
@@ -43,7 +47,8 @@ int main(int argc, char** argv)
             cout << "under: " << pair.first << " , it goes to: " << pair.second.getID() << endl ;
         }
     }*/
-    State s0 = State(0);
+    //Rule
+    /*State s0 = State(0);
     s0.setType(STARTING);
     State s1 = State(1);
     s1.setType(ACCEPTING);
@@ -67,7 +72,7 @@ int main(int argc, char** argv)
         for(auto& pair : min_dfa.getMapping(st)){
             cout << "under: " << pair.first << " , it goes to: " << pair.second.getID() << endl ;
         }
-    }
+    }*/
     // TODO minimize DFA
     // input: TransitionTable
     // output: TransitionTable
