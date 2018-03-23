@@ -34,9 +34,7 @@ NFATransitionTable constructPrimitiveNFA(string s){
                 i++;
 			NFATransitionTable nfa ;
 			State start(State::newID());
-			start.setType(STARTING);
 			State end(State::newID());
-			end.setType(ACCEPTING);
             nfa.setStartingStates(set<State>{start});
 			nfa.setAcceptingStates(set<State>{end});
 			nfa.setTransition(start, s[i], end);
@@ -75,27 +73,12 @@ NFATransitionTable constructPrimitiveNFA(string s){
 }
 
 NFATransitionTable MultiUnion(vector<NFATransitionTable> nfas){
-    /*NFATransitionTable newNFA;
-    State startState(State::newID());
-    newNFA.setStartingStates(set<State>{startState});
-
-    int size = nfas.size();
-    for (int i = 0; i < size; ++i) {
-        newNFA.getAllTransitions().insert(newNFA.getAllTransitions().end(),
-                                          nfas[i].getAllTransitions().begin(),nfas[i].getAllTransitions().end());
-    }
-    for (int j = 0; j < size; ++j) {
-        for(auto& elem:nfas[j].getStartingStates()){
-            newNFA.setTransition(startState,'\0', elem);
-        }
-    }
-    */
     while(nfas.size() >=2){
-        NFATransitionTable nfa1 = nfas.front();
+        NFATransitionTable nfa1 = nfas.back();
         nfas.pop_back();
-        NFATransitionTable nfa2 = nfas.front();
+        NFATransitionTable nfa2 = nfas.back();
         nfas.pop_back();
         nfas.push_back(nfa1.opUnion(nfa2));
     }
-    return nfas.front();
+    return nfas.back();
 }

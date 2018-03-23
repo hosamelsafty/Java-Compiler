@@ -49,6 +49,9 @@ public:
 	std::set<State> getStartingStates() const;
 	std::set<State> getAcceptingStates() const;
 
+	std::set<char> transitionAlphabet(const std::set<State> &) const;
+	bool isAcceptingSet (const std::set<State> &states) const;
+
 	NFATransitionTable opUnion(const NFATransitionTable &rhs) const;
 	NFATransitionTable opConcat(const NFATransitionTable &rhs) const;
 	NFATransitionTable opPlus() const;
