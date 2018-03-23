@@ -16,8 +16,10 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
     DFATransitionTable DFA;
     State startState(newStateId++);
     startState.setType(STARTING);
-    if(nfa.isAcceptingSet(startingSet))
+    if(nfa.isAcceptingSet(startingSet)){
         startState.setType(ACCEPTING);
+        DFA.addAcceptingState(startState);
+    }
     DFA.setStartingState(startState);
     map[startingSet] = startState;
     while(!workingSet.empty())
@@ -31,8 +33,10 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
             if(map.find(t) == map.end()){ // A new set is found
                 // make a new DFA representative state of the NFA set
                 State newState(newStateId++);
-                if(nfa.isAcceptingSet(t))
+                if(nfa.isAcceptingSet(t)) {
                     newState.setType(ACCEPTING);
+                    DFA.addAcceptingState(newState);
+                }
                 map[t] = newState;
                 workingSet.push(t);
             }
