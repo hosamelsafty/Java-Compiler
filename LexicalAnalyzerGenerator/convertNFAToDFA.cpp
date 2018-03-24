@@ -1,4 +1,5 @@
 #include "convertNFAToDFA.h"
+#include "lib/AcceptedTokenMap.h"
 #include <queue>
 
 using namespace std;
@@ -19,6 +20,8 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
     if(nfa.isAcceptingSet(startingSet)){
         startState.setType(ACCEPTING);
         DFA.addAcceptingState(startState);
+        string tkn = AcceptedTokenMap::getNFAMapping(startingSet);
+        AcceptedTokenMap::addDFAMapping(startState,tkn);
     }
     DFA.setStartingState(startState);
     map[startingSet] = startState;
@@ -36,6 +39,8 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
                 if(nfa.isAcceptingSet(t)) {
                     newState.setType(ACCEPTING);
                     DFA.addAcceptingState(newState);
+                    string tkn = AcceptedTokenMap::getNFAMapping(t);
+                    AcceptedTokenMap::addDFAMapping(newState,tkn);
                 }
                 map[t] = newState;
                 workingSet.push(t);

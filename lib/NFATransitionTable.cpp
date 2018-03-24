@@ -124,16 +124,17 @@ bool NFATransitionTable::impl::hasConcreteTransition(const State &state) const
 std::set<State> NFATransitionTable::epsClosure(const State &state) const
 {
     std::set<State> resultColsure;
-
     std::set<State> toBeProcessed;
     std::set<State> doneProcessing;
 
+    State workingState;
+
     toBeProcessed.insert(state);
 
-    while (toBeProcessed.size())
+    while (!toBeProcessed.empty())
     {
-        std::set<State> directClosure = m_d->directClosure(*toBeProcessed.begin(), EPS);
-
+        workingState = *toBeProcessed.begin();
+        std::set<State> directClosure = m_d->directClosure(workingState, EPS);
 
         if (m_d->hasConcreteTransition(*toBeProcessed.begin()))
         {
@@ -151,14 +152,14 @@ std::set<State> NFATransitionTable::epsClosure(const State &state) const
             std::set_difference(directClosure.begin(), directClosure.end(), doneProcessing.begin(), doneProcessing.end(),
                                 std::inserter(newInClosure, newInClosure.begin()));
 
-            if (newInClosure.size())
+            if (!newInClosure.empty())
             {
                 toBeProcessed.insert(newInClosure.begin(), newInClosure.end());
             }
         }
 
-        doneProcessing.insert(*toBeProcessed.begin());
-        toBeProcessed.erase(*toBeProcessed.begin());
+        doneProcessing.insert(workingState);
+        toBeProcessed.erase(workingState);
     }
 
     return resultColsure;
@@ -254,49 +255,84 @@ bool NFATransitionTable::isAcceptingSet (const std::set<State> &states) const
     return false;
 }
 
+
+NFATransitionTable NFATransitionTable::multiUnion(const std::vector<NFATransitionTable>& nfas)
+{
+    NFATransitionTable result;
+    // Depending on the uniqueness of State we will add the states from *this and rhs to result.
+    //  Add all transition of nfas to result
+    for(NFATransitionTable nfa:nfas){
+        for (auto && transition : nfa.m_d->transitions)
+        {
+            result.setTransition(transition);
+        }
+    }
+
+    //  Create resultStartingState
+    State startState(State::newID());
+    result.setStartingStates(std::set<State>{startState});
+
+
+    //  Add to result: transitions from resultStartingState to all startingStates of nfas
+    for(NFATransitionTable nfa:nfas) {
+        for (auto &state : nfa.m_d->startingStates) {
+            result.setTransition(startState, EPS, state);
+        }
+    }
+
+    //  Add to result: ending states of nfas to result ending states
+    for(NFATransitionTable nfa:nfas) {
+        for (auto &state : nfa.m_d->endingStates) {
+            result.addAcceptingStates(state);
+        }
+    }
+
+    return result;
+}
+
 NFATransitionTable NFATransitionTable::opUnion(const NFATransitionTable &rhs) const
 {
   NFATransitionTable result;
   // Depending on the uniqueness of State we will add the states from *this and rhs to result.
- // TODO Add all transition of *this to result
+ //  Add all transition of *this to result
   for (auto && transition : m_d->transitions)
    {
       result.setTransition(transition);
    }
 
-        // TODO Add all transition of rhs to result
+        //  Add all transition of rhs to result
         for (auto && transition : rhs.m_d->transitions)
         {
             result.setTransition(transition);
         }
 
-        // TODO Create resultStartingState
+        //  Create resultStartingState
         State startState(State::newID());
         result.setStartingStates(std::set<State>{startState});
 
-        // TODO Add to result: transitions from resultStartingState to all startingStates of *this
+        //  Add to result: transitions from resultStartingState to all startingStates of *this
         for (auto& state : m_d->startingStates)
         {
             result.setTransition(startState, EPS, state);
         }
 
-        // TODO Add to result: transitions from resultStartingState to all startingStates of rhs
+        //  Add to result: transitions from resultStartingState to all startingStates of rhs
         for (auto& state : rhs.m_d->startingStates)
         {
             result.setTransition(startState, EPS, state);
         }
 
-        // TODO Create resultEndingState
+        //  Create resultEndingState
         State endState(State::newID());
         result.setAcceptingStates(std::set<State>{endState});
 
-        // TODO Add to result: transitions from all endingStates of *this to resultEndingState.
+        //  Add to result: transitions from all endingStates of *this to resultEndingState.
         for (auto& state : m_d->endingStates)
         {
             result.setTransition(state, EPS, endState);
         }
 
-        // TODO Add to result: transitions from all endingStates of rhs to resultEndingState.
+        //  Add to result: transitions from all endingStates of rhs to resultEndingState.
         for (auto& state : rhs.m_d->endingStates)
         {
             result.setTransition(state, EPS, endState);
@@ -315,13 +351,13 @@ NFATransitionTable NFATransitionTable::opConcat(const NFATransitionTable &rhs) c
 
         // Depending on the uniqueness of State we will add the states from *this and rhs to result.
 
-        // TODO Add all transition of *this to result
+        //  Add all transition of *this to result
         for (auto && transition : m_d->transitions)
         {
             result.setTransition(transition);
         }
 
-        // TODO Add all transition of rhs to result.
+        //  Add all transition of rhs to result.
         // Special case for transitions starting at the startingState of rhs.
         // The from part of these transitions will be replaced by the endingState *this when being added to result.
         State endingStateThis = *m_d->endingStates.begin();
@@ -340,11 +376,11 @@ NFATransitionTable NFATransitionTable::opConcat(const NFATransitionTable &rhs) c
     }
     result.setTransition(endingStateThis,EPS,startingStateRHS);
 
-    // TODO Set startingState of result to be the starting state of *this.
+    //  Set startingState of result to be the starting state of *this.
     result.setStartingStates(m_d->startingStates);
 
 
-    // TODO Set endingState of result to be the ending state of rhs.
+    //  Set endingState of result to be the ending state of rhs.
     result.setAcceptingStates(rhs.m_d->endingStates);
     return result;
 }
@@ -370,7 +406,7 @@ NFATransitionTable NFATransitionTable::opStar() const
     State startingStateThis = *m_d->startingStates.begin();
     State endingStateThis = *m_d->endingStates.begin();
 
-    // TODO Add all transition of *this to result
+    //  Add all transition of *this to result
     for (auto && transition : m_d->transitions)
     {
         result.setTransition(transition);

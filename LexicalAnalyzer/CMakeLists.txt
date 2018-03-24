@@ -16,4 +16,4 @@ file(GLOB here_SRC
     "*.cpp"
 )
 
-add_executable(LexicalAnalyzer ${here_SRC} ${lib_SRC} ${rapidjson_SRC} ../lib/DFATransitionTable.cpp ../lib/DFATransitionTable.h)
+add_executable(LexicalAnalyzer ${here_SRC} ${lib_SRC} ${rapidjson_SRC} ../lib/DFATransitionTable.cpp ../lib/DFATransitionTable.h ../lib/AcceptedTokenMap.cpp ../lib/AcceptedTokenMap.h)

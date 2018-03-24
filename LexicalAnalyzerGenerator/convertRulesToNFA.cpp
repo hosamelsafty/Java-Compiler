@@ -1,11 +1,9 @@
 #include "convertRulesToNFA.h"
 #include <fstream>
 #include "RulesHandler.h"
+#include "lib/AcceptedTokenMap.h"
 
 using namespace std;
-
-// TODO hashmap
-// TODO test pointer in operation
 
 NFATransitionTable convertRulesToNFA(const std::string &filename)
 {
@@ -16,8 +14,12 @@ NFATransitionTable convertRulesToNFA(const std::string &filename)
 	for (int i = 0; i < size; ++i) {
 		string postfix = rules.regExp[i].second;
 		nfas.push_back(constructPrimitiveNFA(postfix));
+        // Add mapping from end states of nfa to matched tokens
+        AcceptedTokenMap::addNFAMapping(*nfas.back().getAcceptingStates().begin(),
+                                        rules.regExp[i].first);
 	}
-	return MultiUnion(nfas);
+
+	return NFATransitionTable::multiUnion(nfas);
 }
 
 bool  is_operator(char c){
@@ -32,6 +34,8 @@ NFATransitionTable constructPrimitiveNFA(string s){
 		if(!is_operator(s[i])){
             if(s[i] == '\\')
                 i++;
+            if(s[i] == 'L')
+                s[i] = EPS;
 			NFATransitionTable nfa ;
 			State start(State::newID());
 			State end(State::newID());
@@ -42,16 +46,16 @@ NFATransitionTable constructPrimitiveNFA(string s){
 		}
 		else {
 			if(s[i]=='|'){
-				NFATransitionTable nfa1=stack.top();
-				stack.pop();
 				NFATransitionTable nfa2=stack.top();
+				stack.pop();
+				NFATransitionTable nfa1=stack.top();
 				stack.pop();
 				stack.push(nfa1.opUnion(nfa2));
 			}
 			else if(s[i]==' '){
-				NFATransitionTable nfa1=stack.top();
-				stack.pop();
 				NFATransitionTable nfa2=stack.top();
+				stack.pop();
+				NFATransitionTable nfa1=stack.top();
 				stack.pop();
 				stack.push(nfa1.opConcat(nfa2));
 			}
@@ -70,15 +74,4 @@ NFATransitionTable constructPrimitiveNFA(string s){
 
 	return stack.top();
 
-}
-
-NFATransitionTable MultiUnion(vector<NFATransitionTable> nfas){
-    while(nfas.size() >=2){
-        NFATransitionTable nfa1 = nfas.back();
-        nfas.pop_back();
-        NFATransitionTable nfa2 = nfas.back();
-        nfas.pop_back();
-        nfas.push_back(nfa1.opUnion(nfa2));
-    }
-    return nfas.back();
 }

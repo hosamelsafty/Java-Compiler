@@ -97,7 +97,6 @@ std::set<State> DFATransitionTable::getAcceptingStates() const
     return m_d->endingStates;
 }
 
-
 std::ostream& operator<<(std::ostream& out, const DFATransitionTable &transitionTable)
 {
     using namespace rapidjson;
@@ -123,6 +122,18 @@ std::ostream& operator<<(std::ostream& out, const DFATransitionTable &transition
 
         d["tt"].PushBack(row, allocator);
     }
+
+    d.AddMember("startState", transitionTable.getStartingState().getID(), allocator);
+
+    Value acceptingStates;
+    acceptingStates.SetArray();
+
+    for (auto & state : transitionTable.getAcceptingStates())
+    {
+        acceptingStates.PushBack(state.getID(), allocator);
+    }
+
+    d.AddMember("acceptingStates", acceptingStates, allocator);
 
     OStreamWrapper osw(out);
     PrettyWriter<OStreamWrapper> writer(osw);
@@ -157,6 +168,13 @@ std::istream& operator>>(std::istream& in, DFATransitionTable &transitionTable)
                 table[currentState][input] = nextState;
             }
         }
+    }
+
+    transitionTable.setStartingState(State(d["startState"].GetInt()));
+
+    for (auto & value : d["acceptingStates"].GetArray())
+    {
+        transitionTable.addAcceptingState(State(value.GetInt()));
     }
 
     transitionTable.m_d->table = table;
