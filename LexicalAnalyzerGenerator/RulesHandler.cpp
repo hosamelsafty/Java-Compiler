@@ -85,14 +85,12 @@ void RulesHandler::init_rules() {
         if(line.at(0)=='['){
             line=line.substr(1,line.length()-2);
             trim(line);
-            add_in_symbol_table(line,"keyword");
-            keyword.push_back(line);
+            add_in_vector(line,"punctuation");
         }
         else if(line.at(0)=='{'){
             line=line.substr(1,line.length()-2);
             trim(line);
-            add_in_symbol_table(line,"punctuation");
-            punc.push_back(line);
+            add_in_vector(line,"keyword");
         }
         else{
             replaceAll(line, " ", "");
@@ -105,7 +103,7 @@ void RulesHandler::init_rules() {
                 }
                 if(line.at(i)=='='){
                     string exp_name=line.substr(0,i);
-                    string regular_expanded=expand_slash(line.substr(i+1,line.length()));
+                    string regular_expanded=expand_score(line.substr(i+1,line.length()));
 
                     pair <string,string> temp (exp_name,regular_expanded);
                     regDef.push_back(temp);
@@ -121,7 +119,6 @@ void RulesHandler::init_rules() {
     edit_expression_from_definition();
     for (int i = 0; i < regExp.size(); ++i) {
         regExp[i].second=infixToPostfix(regExp[i].second);
-        cout<< regExp[i].first << " :" << regExp[i].second << endl;
     }
 }
 void RulesHandler::replaceAll(std::string& str, const std::string& from, const std::string& to) {
@@ -146,7 +143,7 @@ string RulesHandler::expand_seq(char from,char to){
     return temp;
 }
 
-string RulesHandler::expand_slash(string line){
+string RulesHandler::expand_score(string line){
 
     string temp="";
     for (int i = 0; i < line.length(); ++i) {
@@ -162,13 +159,17 @@ string RulesHandler::expand_slash(string line){
     }
     return temp;
 }
-void RulesHandler::add_in_symbol_table(string line,string type){
+void RulesHandler::add_in_vector(string line,string type){
     vector<string> res;
     split( line, res, ' ' );
     for (int i = 0; i < res.size(); ++i) {
         replaceAll(res[i], "\\", "");
-        Token token(type,res[i]);
-        symbol_table.push_back(token);
+        if(type=="keyword"){
+        	keyword.push_back(res[i]);
+        }
+        else if(type == "punctuation"){
+        	punc.push_back(res[i]);
+        }
     }
 }
 int  RulesHandler::getPrecedence(char c){
@@ -220,6 +221,15 @@ string RulesHandler::formatRegEx(string regex) {
     return res;
 }
 
+vector<string>  RulesHandler::format_keyword(string line){
+    vector<string> res;
+    split( line, res, ' ' );
+    for (int i = 0; i < res.size(); ++i) {
+        replaceAll(res[i], "\\", "");
+        res[i]=infixToPostfix(res[i]);
+    }
+    return res;
+}
 string RulesHandler::infixToPostfix(string regex) {
     string postfix = "";
 

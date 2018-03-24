@@ -12,7 +12,6 @@ class LexicalAnalyzer
 {
 public:
     LexicalAnalyzer(DFATransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog);
-    LexicalAnalyzer(DFATransitionTable &transitionTable, std::istream& in); // for debugging purpose.
     ~LexicalAnalyzer();
     Token* nextToken();
 private:
@@ -20,7 +19,8 @@ private:
     		std::string&, int &indx, int &lastAccIndx,
     		State& ,State& );
     std::istream& input;
-//    ErrorLog& errLog; // for debugging purpose.
+    int noLine;
+    ErrorLog& errLog;
     DFATransitionTable& dfa_t;
     std::string remainingInput;
 };

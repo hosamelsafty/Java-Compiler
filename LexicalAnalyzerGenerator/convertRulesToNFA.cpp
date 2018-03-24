@@ -4,18 +4,21 @@
 
 using namespace std;
 
-// TODO hashmap
-// TODO test pointer in operation
+
 
 NFATransitionTable convertRulesToNFA(const std::string &filename)
 {
 	RulesHandler rules(filename);
 	rules.init_rules();
-	int size = rules.regExp.size();
-	vector<NFATransitionTable> nfas;
+	int size = rules.regExp.size()+rules.keyword.size();
+	vector<std::pair <NFATransitionTable ,std::string >> nfas;
 	for (int i = 0; i < size; ++i) {
 		string postfix = rules.regExp[i].second;
-		nfas.push_back(constructPrimitiveNFA(postfix));
+		nfas.push_back(make_pair(constructPrimitiveNFA(postfix),rules.regExp[i].second));
+	}
+	for (int i = 0; i < size; ++i) {
+		string postfix = rules.infixToPostfix(rules.keyword[i]);
+		nfas.push_back(make_pair(constructPrimitiveNFA(postfix),rules.keyword[i]));
 	}
 	return MultiUnion(nfas);
 }
@@ -50,6 +53,7 @@ NFATransitionTable constructPrimitiveNFA(string s){
 				stack.pop();
 				stack.push(nfa1.opUnion(nfa2));
 			}
+
 			else if(s[i]==' '){
 				NFATransitionTable nfa1=stack.top();
 				stack.pop();
@@ -74,7 +78,7 @@ NFATransitionTable constructPrimitiveNFA(string s){
 
 }
 
-NFATransitionTable MultiUnion(vector<NFATransitionTable> nfas){
+NFATransitionTable MultiUnion(vector<pair<NFATransitionTable ,string > > nfas){
     /*NFATransitionTable newNFA;
     State startState(State::newID());
     newNFA.setStartingStates(set<State>{startState});
@@ -91,9 +95,9 @@ NFATransitionTable MultiUnion(vector<NFATransitionTable> nfas){
     }
     */
     while(nfas.size() >=2){
-        NFATransitionTable nfa1 = nfas.front();
+        NFATransitionTable nfa1 = nfas.front().first;
         nfas.pop_back();
-        NFATransitionTable nfa2 = nfas.front();
+        NFATransitionTable nfa2 = nfas.front().first;
         nfas.pop_back();
         nfas.push_back(nfa1.opUnion(nfa2));
     }

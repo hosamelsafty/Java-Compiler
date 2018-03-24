@@ -123,11 +123,23 @@ std::ostream& operator<<(std::ostream& out, const DFATransitionTable &transition
         {
             std::string charString(1, inputResultPair.first);
             Value input(charString.c_str(), charString.size(), allocator);
-			row.AddMember(input, inputResultPair.second.getID(), allocator);
+            row.AddMember(input, inputResultPair.second.getID(), allocator);
         }
 
         d["tt"].PushBack(row, allocator);
     }
+
+	d.AddMember("startState", transitionTable.getStartingState().getID(), allocator);
+
+	Value acceptingStates;
+	acceptingStates.SetArray();
+
+	for (auto & state : transitionTable.getAcceptingStates())
+	{
+		acceptingStates.PushBack(state.getID(), allocator);
+	}
+
+	d.AddMember("acceptingStates", acceptingStates, allocator);
 
     OStreamWrapper osw(out);
     PrettyWriter<OStreamWrapper> writer(osw);
@@ -163,6 +175,13 @@ std::istream& operator>>(std::istream& in, DFATransitionTable &transitionTable)
             }
         }
     }
+
+	transitionTable.setStartingState(State(d["startState"].GetInt()));
+
+	for (auto & value : d["acceptingStates"].GetArray())
+	{
+		transitionTable.addAcceptingState(State(value.GetInt()));
+	}
 
     transitionTable.m_d->table = table;
 
