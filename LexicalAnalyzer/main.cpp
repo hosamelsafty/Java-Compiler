@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     // TODO Check for return value
     codeFile.open(codeFilename);
 
-    LexicalAnalyzer lexicalAnalyzer(dfa, codeFile, errorLog);
+    LexicalAnalyzer lexicalAnalyzer(dfa, codeFile, &errorLog);
 
 
     // Execute the lexical analyzer to process the whole file

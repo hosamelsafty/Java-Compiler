@@ -3,26 +3,26 @@
 
 #include "DFATransitionTable.h"
 #include "Token.h"
+#include "StreamWrapper.h"
 
 #include <iostream>
 
 class ErrorLog;
+class SymbolTable;
 
 class LexicalAnalyzer
 {
 public:
-    LexicalAnalyzer(DFATransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog);
-    LexicalAnalyzer(DFATransitionTable &transitionTable, std::istream& in); // for debugging purpose.
+    LexicalAnalyzer(DFATransitionTable &transitionTable, std::istream& in, ErrorLog *errorLog = nullptr, SymbolTable *symbolTable = nullptr);
     ~LexicalAnalyzer();
+
     Token* nextToken();
+
 private:
-    void getToken(std::istream&,
-        std::string&, int &indx, int &lastAccIndx,
-        State&, State&);
-    std::istream& input;
-    //    ErrorLog& errLog; // for debugging purpose.
     DFATransitionTable& dfa_t;
-    std::string remainingInput;
+    StreamWrapper _streamWrapper;
+    ErrorLog * errorLog;
+    SymbolTable * symbolTable;
 };
 
 #endif // LexicalAnalyzer_H
