@@ -27,7 +27,9 @@ DFATransitionTable::DFATransitionTable()
 DFATransitionTable::DFATransitionTable(const DFATransitionTable & t)
         : m_d(std::make_unique<impl>())
 {
-    m_d->table = t.m_d->table;
+	m_d->table = t.m_d->table;
+	m_d->startingState = t.m_d->startingState;
+	m_d->endingStates = t.m_d->endingStates;
 }
 
 DFATransitionTable::~DFATransitionTable()
@@ -123,17 +125,17 @@ std::ostream& operator<<(std::ostream& out, const DFATransitionTable &transition
         d["tt"].PushBack(row, allocator);
     }
 
-    d.AddMember("startState", transitionTable.getStartingState().getID(), allocator);
+	d.AddMember("startState", transitionTable.getStartingState().getID(), allocator);
 
-    Value acceptingStates;
-    acceptingStates.SetArray();
+	Value acceptingStates;
+	acceptingStates.SetArray();
 
-    for (auto & state : transitionTable.getAcceptingStates())
-    {
-        acceptingStates.PushBack(state.getID(), allocator);
-    }
+	for (auto & state : transitionTable.getAcceptingStates())
+	{
+		acceptingStates.PushBack(state.getID(), allocator);
+	}
 
-    d.AddMember("acceptingStates", acceptingStates, allocator);
+	d.AddMember("acceptingStates", acceptingStates, allocator);
 
     OStreamWrapper osw(out);
     PrettyWriter<OStreamWrapper> writer(osw);
@@ -150,6 +152,9 @@ std::istream& operator>>(std::istream& in, DFATransitionTable &transitionTable)
 
     Document d;
     d.ParseStream(isw);
+
+	if (!(d.HasMember("tt") && d.HasMember("startState") && d.HasMember("acceptingStates")))
+		return in;
 
     std::map < State, std::map<char, State > > table;
 
