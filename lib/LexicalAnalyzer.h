@@ -16,11 +16,11 @@ public:
     ~LexicalAnalyzer();
     Token* nextToken();
 private:
-    void getToken(std::istream& ,
-    		std::string&, int &indx, int &lastAccIndx,
-    		State& ,State& );
+    void getToken(std::istream&,
+        std::string&, int &indx, int &lastAccIndx,
+        State&, State&);
     std::istream& input;
-//    ErrorLog& errLog; // for debugging purpose.
+    //    ErrorLog& errLog; // for debugging purpose.
     DFATransitionTable& dfa_t;
     std::string remainingInput;
 };

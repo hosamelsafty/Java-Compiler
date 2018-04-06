@@ -19,17 +19,17 @@ struct DFATransitionTable::impl
 };
 
 DFATransitionTable::DFATransitionTable()
-        : m_d(std::make_unique<impl>())
+    : m_d(std::make_unique<impl>())
 {
 
 }
 
 DFATransitionTable::DFATransitionTable(const DFATransitionTable & t)
-        : m_d(std::make_unique<impl>())
+    : m_d(std::make_unique<impl>())
 {
-	m_d->table = t.m_d->table;
-	m_d->startingState = t.m_d->startingState;
-	m_d->endingStates = t.m_d->endingStates;
+    m_d->table = t.m_d->table;
+    m_d->startingState = t.m_d->startingState;
+    m_d->endingStates = t.m_d->endingStates;
 }
 
 DFATransitionTable::~DFATransitionTable()
@@ -47,7 +47,7 @@ State DFATransitionTable::nextState(const State &currentState, char input) const
     return m_d->table[currentState][input];
 }
 
-bool DFATransitionTable::checkTransition (const State &currentState, char input) const
+bool DFATransitionTable::checkTransition(const State &currentState, char input) const
 {
     std::map<char, State> table = m_d->table[currentState];
     return table.find(input) != table.end();
@@ -56,14 +56,14 @@ bool DFATransitionTable::checkTransition (const State &currentState, char input)
 std::vector<State> DFATransitionTable::getStates() const
 {
     std::vector<State> keys;
-    for( auto& pair : m_d->table)
+    for (auto& pair : m_d->table)
     {
         keys.push_back(pair.first);
     }
     return keys;
 }
 
-std::map<char,State> DFATransitionTable::getMapping(const State& state) const
+std::map<char, State> DFATransitionTable::getMapping(const State& state) const
 {
     return m_d->table[state];
 }
@@ -125,17 +125,17 @@ std::ostream& operator<<(std::ostream& out, const DFATransitionTable &transition
         d["tt"].PushBack(row, allocator);
     }
 
-	d.AddMember("startState", transitionTable.getStartingState().getID(), allocator);
+    d.AddMember("startState", transitionTable.getStartingState().getID(), allocator);
 
-	Value acceptingStates;
-	acceptingStates.SetArray();
+    Value acceptingStates;
+    acceptingStates.SetArray();
 
-	for (auto & state : transitionTable.getAcceptingStates())
-	{
-		acceptingStates.PushBack(state.getID(), allocator);
-	}
+    for (auto & state : transitionTable.getAcceptingStates())
+    {
+        acceptingStates.PushBack(state.getID(), allocator);
+    }
 
-	d.AddMember("acceptingStates", acceptingStates, allocator);
+    d.AddMember("acceptingStates", acceptingStates, allocator);
 
     OStreamWrapper osw(out);
     PrettyWriter<OStreamWrapper> writer(osw);
@@ -144,7 +144,7 @@ std::ostream& operator<<(std::ostream& out, const DFATransitionTable &transition
     return out;
 }
 
-std::istream& operator>>(std::istream& in, DFATransitionTable &transitionTable)
+std::istream& operator >> (std::istream& in, DFATransitionTable &transitionTable)
 {
     using namespace rapidjson;
 
@@ -153,14 +153,14 @@ std::istream& operator>>(std::istream& in, DFATransitionTable &transitionTable)
     Document d;
     d.ParseStream(isw);
 
-	if (!(d.HasMember("tt") && d.HasMember("startState") && d.HasMember("acceptingStates")))
-		return in;
+    if (!(d.HasMember("tt") && d.HasMember("startState") && d.HasMember("acceptingStates")))
+        return in;
 
     std::map < State, std::map<char, State > > table;
 
-    for ( auto& row : d["tt"].GetArray())
+    for (auto& row : d["tt"].GetArray())
     {
-        State currentState( row["currentState"].GetInt() );
+        State currentState(row["currentState"].GetInt());
 
         for (auto& m : row.GetObject())
         {

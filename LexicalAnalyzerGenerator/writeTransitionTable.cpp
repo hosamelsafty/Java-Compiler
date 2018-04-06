@@ -3,9 +3,9 @@
 
 void writeTransitionTable(const DFATransitionTable &dfa, const std::string &filename)
 {
-	std::ofstream file;
-	file.open(filename);
-	file << dfa;
-	file.flush();
-	file.close();
+    std::ofstream file;
+    file.open(filename);
+    file << dfa;
+    file.flush();
+    file.close();
 }

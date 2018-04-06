@@ -6,12 +6,14 @@ using namespace std;
 class Token
 {
 public:
-    string type,value;
-    Token(string t,string v){
+    string type, value;
+    Token(string t, string v)
+    {
         type = t;
         value = v;
     };
-    virtual ~Token(){
+    virtual ~Token()
+    {
 
     };
 };

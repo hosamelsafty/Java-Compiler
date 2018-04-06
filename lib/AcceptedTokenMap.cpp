@@ -7,20 +7,21 @@
 std::map<State, std::string> AcceptedTokenMap::nfaMap;
 std::map<State, std::string> AcceptedTokenMap::dfaMap;
 
-void AcceptedTokenMap::addNFAMapping(const State & state,std::string tokenType)
+void AcceptedTokenMap::addNFAMapping(const State & state, std::string tokenType)
 {
     nfaMap[state] = tokenType;
 }
 std::string AcceptedTokenMap::getNFAMapping(const std::set<State> & states)
 {
-    for(State s:states){
-        if(nfaMap.find(s) != nfaMap.end())
+    for (State s : states)
+    {
+        if (nfaMap.find(s) != nfaMap.end())
             return nfaMap[s];
     }
     return NULL;
 }
 
-void AcceptedTokenMap::addDFAMapping(const State & state,std::string tokenType)
+void AcceptedTokenMap::addDFAMapping(const State & state, std::string tokenType)
 {
     dfaMap[state] = tokenType;
 }
