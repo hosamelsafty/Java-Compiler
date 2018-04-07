@@ -7,7 +7,7 @@
 
 using namespace std;
 
-NFATransitionTable nfaOfRule(const Rule &rule);
+NFATransitionTable nfaOfRule(const Rule &rule, int priority);
 NFATransitionTable nfaOfRegex(const string &regex);
 
 NFATransitionTable convertRulesToNFA(const std::string &filename)
@@ -16,16 +16,16 @@ NFATransitionTable convertRulesToNFA(const std::string &filename)
     std::vector<Rule> rules = rulesReader.process(filename);
 
     vector<NFATransitionTable> nfas;
-    for (auto &rule : rules)
+    for (int i=0; i<rules.size(); ++i)
     {
-        NFATransitionTable nfa = nfaOfRule(rule);
+        NFATransitionTable nfa = nfaOfRule(rules[i], rules.size() - i);
         nfas.push_back(nfa);
     }
 
-    return NFATransitionTable::multiUnion(nfas);
+    return NFATransitionTable::mergeNFAs(nfas);
 }
 
-NFATransitionTable nfaOfRule(const Rule &rule)
+NFATransitionTable nfaOfRule(const Rule &rule, int priority)
 {
     NFATransitionTable nfa = nfaOfRegex(rule.regex);
 
@@ -35,6 +35,7 @@ NFATransitionTable nfaOfRule(const Rule &rule)
     {
         State acceptingState(state);
         acceptingState.setTokenType(rule.type);
+        acceptingState.setPriority(priority);
         acceptingStates.insert(acceptingState);
     }
     nfa.setAcceptingStates(acceptingStates);

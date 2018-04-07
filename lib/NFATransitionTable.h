@@ -39,6 +39,8 @@ public:
 
     std::set<State> epsClosure(const State &state) const;
     std::set<State> epsClosure(const std::set<State> &states) const;
+    std::set<State> epsClosure2(const State &state) const;
+    std::set<State> epsClosure2(const std::set<State> &states) const;
     std::set<State> move(const std::set<State> &states, char input) const;
 
     void setStartingStates(const std::set<State> &states);
@@ -53,9 +55,10 @@ public:
     std::set<State> getAcceptingStates() const;
 
     std::set<char> transitionAlphabet(const std::set<State> &) const;
+    std::set<char> transitionAlphabet2(const std::set<State> &) const;
     bool isAcceptingSet(const std::set<State> &states) const;
 
-    static NFATransitionTable multiUnion(const std::vector<NFATransitionTable>& nfas);
+    static NFATransitionTable mergeNFAs(const std::vector<NFATransitionTable>& nfas);
     NFATransitionTable opUnion(const NFATransitionTable &rhs) const;
     NFATransitionTable opConcat(const NFATransitionTable &rhs) const;
     NFATransitionTable opPlus() const;

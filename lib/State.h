@@ -14,8 +14,11 @@ class State
 {
     static int new_id;
     int id;
-    Type type;
+
     std::string tokenType;
+    int priority;
+
+    Type type;
 public:
     State();
     State(int number);
@@ -25,6 +28,9 @@ public:
 
     void setTokenType(std::string str);
     std::string getTokenType() const;
+
+    void setPriority(int p);
+    int getPriority() const;
 
     const State &operator=(const State &s);
     bool operator==(const State & s) const;

@@ -179,6 +179,58 @@ std::set<State> NFATransitionTable::epsClosure(const std::set<State> &states) co
     return resultClosure;
 }
 
+std::set<State> NFATransitionTable::epsClosure2(const State &state) const
+{
+    std::set<State> resultColsure;
+    std::set<State> toBeProcessed;
+    std::set<State> doneProcessing;
+
+    State workingState;
+
+    resultColsure.insert(state);
+    toBeProcessed.insert(state);
+
+    while (!toBeProcessed.empty())
+    {
+        workingState = *toBeProcessed.begin();
+        std::set<State> directClosure = m_d->directClosure(workingState, EPS);
+
+        resultColsure.insert(directClosure.begin(), directClosure.end());
+
+        if (!directClosure.empty())
+        {
+            std::set<State> newInClosure;
+
+            std::set_difference(directClosure.begin(), directClosure.end(), doneProcessing.begin(), doneProcessing.end(),
+                std::inserter(newInClosure, newInClosure.begin()));
+
+            if (!newInClosure.empty())
+            {
+                toBeProcessed.insert(newInClosure.begin(), newInClosure.end());
+            }
+        }
+
+        doneProcessing.insert(workingState);
+        toBeProcessed.erase(workingState);
+    }
+
+    return resultColsure;
+}
+
+std::set<State> NFATransitionTable::epsClosure2(const std::set<State> &states) const
+{
+    std::set<State> resultClosure;
+
+    for (auto && state : states)
+    {
+        // This is not efficient but correct
+        std::set<State> closure = epsClosure(state);
+        resultClosure.insert(closure.begin(), closure.end());
+    }
+
+    return resultClosure;
+}
+
 std::set<State> NFATransitionTable::move(const std::set<State> &states, char input) const
 {
     std::set<State> directClosureOfinput;
@@ -247,11 +299,29 @@ std::set<char> NFATransitionTable::transitionAlphabet(const std::set<State> &sta
     return result;
 }
 
+std::set<char> NFATransitionTable::transitionAlphabet2(const std::set<State> &states) const
+{
+    std::set<char> result;
+
+    for (auto &state : states)
+    {
+        std::set<int> fromIndeces = m_d->fromIndex[state];
+        for (int i : fromIndeces)
+        {
+            if (std::get<1>(m_d->transitions[i]) != EPS)
+            {
+                result.insert(std::get<1>(m_d->transitions[i]));
+            }
+        }
+    }
+
+    return result;
+}
+
 bool NFATransitionTable::isAcceptingSet(const std::set<State> &states) const
 {
     for (auto& state : states)
     {
-
         if (m_d->endingStates.find(state) != m_d->endingStates.end())
         {
             return true;
@@ -261,7 +331,7 @@ bool NFATransitionTable::isAcceptingSet(const std::set<State> &states) const
 }
 
 
-NFATransitionTable NFATransitionTable::multiUnion(const std::vector<NFATransitionTable>& nfas)
+NFATransitionTable NFATransitionTable::mergeNFAs(const std::vector<NFATransitionTable>& nfas)
 {
     NFATransitionTable result;
     // Depending on the uniqueness of State we will add the states from *this and rhs to result.

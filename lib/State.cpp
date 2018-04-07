@@ -4,12 +4,12 @@
 int State::new_id = 0;
 
 State::State()
-    : id(State::newID()), type(REGULAR)
+    : id(State::newID()), type(REGULAR), priority(0)
 {
 }
 
 State::State(int number)
-    : id(number), type(REGULAR)
+    : id(number), type(REGULAR), priority(0)
 {
 }
 
@@ -30,6 +30,16 @@ void State::setTokenType(std::string str)
 std::string State::getTokenType() const
 {
     return tokenType;
+}
+
+void State::setPriority(int p)
+{
+    priority = p;
+}
+
+int State::getPriority() const
+{
+    return priority;
 }
 
 bool State::operator==(const State & s) const
