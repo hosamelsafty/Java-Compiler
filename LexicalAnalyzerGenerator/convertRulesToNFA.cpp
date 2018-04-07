@@ -1,86 +1,197 @@
 #include "convertRulesToNFA.h"
+#include "lib/RulesReader.h"
+
+#include <stack>
 #include <fstream>
-#include "RulesHandler.h"
-#include "lib/AcceptedTokenMap.h"
+#include <assert.h>
 
 using namespace std;
 
+NFATransitionTable nfaOfRule(const Rule &rule);
+NFATransitionTable nfaOfRegex(const string &regex);
+
 NFATransitionTable convertRulesToNFA(const std::string &filename)
 {
-    RulesHandler rules(filename);
-    rules.init_rules();
-    int size = rules.regExp.size();
+    RulesReader rulesReader;
+    std::vector<Rule> rules = rulesReader.process(filename);
+
     vector<NFATransitionTable> nfas;
-    for (int i = 0; i < size; ++i)
+    for (auto &rule : rules)
     {
-        string postfix = rules.regExp[i].second;
-        nfas.push_back(constructPrimitiveNFA(postfix));
-        // Add mapping from end states of nfa to matched tokens
-        AcceptedTokenMap::addNFAMapping(*nfas.back().getAcceptingStates().begin(),
-            rules.regExp[i].first);
+        NFATransitionTable nfa = nfaOfRule(rule);
+        nfas.push_back(nfa);
     }
 
     return NFATransitionTable::multiUnion(nfas);
 }
 
-bool is_operator(char c)
+NFATransitionTable nfaOfRule(const Rule &rule)
 {
-    return c == '|' || c == ' ' || c == '+' || c == '*';
+    NFATransitionTable nfa = nfaOfRegex(rule.regex);
+
+    std::set<State> states = nfa.getAcceptingStates();
+    std::set<State> acceptingStates;
+    for (auto &state : states)
+    {
+        State acceptingState(state);
+        acceptingState.setTokenType(rule.type);
+        acceptingStates.insert(acceptingState);
+    }
+    nfa.setAcceptingStates(acceptingStates);
+
+    return nfa;
 }
 
-NFATransitionTable constructPrimitiveNFA(string s)
-{
-    stack<NFATransitionTable> stack;
-    for (int i = 0; i < s.length(); ++i)
-    {
 
-        if (!is_operator(s[i]))
+struct node
+{
+    bool isOp;
+    NFATransitionTable nfa;
+    char op;
+
+    node(const NFATransitionTable &n) : isOp(false), nfa(n) {}
+    node(char o) : isOp(true), op(o) {}
+};
+
+NFATransitionTable charNFA(char c);
+void windUpLastUnion(stack<node> &nodeStack);
+
+NFATransitionTable nfaOfRegex(const string &regex)
+{
+    std::stack<node> nodeStack;
+
+    bool backslash = false;
+    for (size_t i = 0; i < regex.size(); ++i)
+    {
+        backslash = false;
+        switch (regex[i])
         {
-            if (s[i] == '\\')
-                i++;
-            if (s[i] == 'L')
-                s[i] = EPS;
-            NFATransitionTable nfa;
-            State start(State::newID());
-            State end(State::newID());
-            nfa.setStartingStates(set<State>{start});
-            nfa.setAcceptingStates(set<State>{end});
-            nfa.setTransition(start, s[i], end);
-            stack.push(nfa);
+        case ' ':
+            break;
+        case '\\':
+            backslash = true;
+            ++i;
+        default:
+        {
+            char ch = regex[i];
+            if (backslash && ch == 'L')
+            {
+                ch = EPS;
+            }
+
+            NFATransitionTable tempNFA = charNFA(ch);
+            if (nodeStack.size())
+            {
+                if (!nodeStack.top().isOp)
+                {
+                    tempNFA = nodeStack.top().nfa.opConcat(tempNFA);
+                    nodeStack.pop();
+                }
+            }
+            nodeStack.push(node(tempNFA));
+            break;
         }
-        else
+        case '|':
+            assert(nodeStack.size() && !nodeStack.top().isOp);
+
+            windUpLastUnion(nodeStack); // find previous '|' and process it
+
+            nodeStack.push(node('|'));
+            break;
+        case '*':
         {
-            if (s[i] == '|')
+            assert(nodeStack.size() && !nodeStack.top().isOp);
+
+            NFATransitionTable temp = nodeStack.top().nfa.opStar();
+            nodeStack.pop();
+            nodeStack.push(node(temp));
+            break;
+        }
+        case '+':
+        {
+            assert(nodeStack.size() && !nodeStack.top().isOp);
+
+            NFATransitionTable temp = nodeStack.top().nfa.opPlus();
+            nodeStack.pop();
+            nodeStack.push(node(temp));
+            break;
+        }
+        case '(':
+            nodeStack.push(node('('));
+            break;
+        case ')':
+            assert(nodeStack.size() && !nodeStack.top().isOp);
+
+            windUpLastUnion(nodeStack); // find previous '|' and process it
+
+            if (nodeStack.size() >= 2)
             {
-                NFATransitionTable nfa2 = stack.top();
-                stack.pop();
-                NFATransitionTable nfa1 = stack.top();
-                stack.pop();
-                stack.push(nfa1.opUnion(nfa2));
+                node temp = nodeStack.top();
+                nodeStack.pop();
+                assert(nodeStack.top().isOp && nodeStack.top().op == '(');
+                nodeStack.pop();
+
+                if (nodeStack.size())
+                {
+                    if (!nodeStack.top().isOp)
+                    {
+                        temp.nfa = nodeStack.top().nfa.opConcat(temp.nfa);
+                        nodeStack.pop();
+                    }
+                }
+
+                nodeStack.push(temp);
             }
-            else if (s[i] == ' ')
-            {
-                NFATransitionTable nfa2 = stack.top();
-                stack.pop();
-                NFATransitionTable nfa1 = stack.top();
-                stack.pop();
-                stack.push(nfa1.opConcat(nfa2));
-            }
-            else if (s[i] == '*')
-            {
-                NFATransitionTable nfa = stack.top();
-                stack.pop();
-                stack.push(nfa.opStar());
-            }
-            else if (s[i] == '+')
-            {
-                NFATransitionTable nfa = stack.top();
-                stack.pop();
-                stack.push(nfa.opPlus());
-            }
+            break;
         }
     }
 
-    return stack.top();
+    windUpLastUnion(nodeStack);
 
+    if (nodeStack.empty())
+    {
+        return NFATransitionTable();
+    }
+    else
+    {
+        assert(nodeStack.size() == 1 && !nodeStack.top().isOp);
+        return nodeStack.top().nfa;
+    }
 }
+
+
+NFATransitionTable charNFA(char c)
+{
+    NFATransitionTable nfa;
+    State s, f;
+    nfa.setTransition(s, c, f);
+    nfa.addStartingState(s);
+    nfa.addAcceptingStates(f);
+    return nfa;
+}
+
+void windUpLastUnion(stack<node> &nodeStack)
+{
+    assert(nodeStack.size() && !nodeStack.top().isOp);
+    if (nodeStack.size() >= 3)
+    {
+        node top = nodeStack.top();
+        nodeStack.pop();
+        if (nodeStack.top().isOp && nodeStack.top().op == '|')
+        {
+            nodeStack.pop();
+            NFATransitionTable unionNFA = nodeStack.top().nfa.opUnion(top.nfa);
+            nodeStack.pop();
+            nodeStack.push(unionNFA);
+        }
+        else
+        {
+            nodeStack.push(top);
+        }
+    }
+}
+
+
+
+
+

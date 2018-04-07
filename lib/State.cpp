@@ -1,10 +1,16 @@
 #include "State.h"
 #include <iostream>
+
 int State::new_id = 0;
-State::State(int number)
-    : id(number)
+
+State::State()
+    : id(State::newID()), type(REGULAR)
 {
-    type = REGULAR;
+}
+
+State::State(int number)
+    : id(number), type(REGULAR)
+{
 }
 
 void State::setType(Type t)
@@ -15,6 +21,16 @@ void State::setType(Type t)
 Type State::getType() const { return type; }
 
 int State::getID()const { return id; }
+
+void State::setTokenType(std::string str)
+{
+    tokenType = str;
+}
+
+std::string State::getTokenType() const
+{
+    return tokenType;
+}
 
 bool State::operator==(const State & s) const
 {

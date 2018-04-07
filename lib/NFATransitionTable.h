@@ -10,7 +10,10 @@
 #include <tuple>
 
 #include "State.h"
-const char EPS = '\17';
+enum
+{
+    EPS = '\17'
+};
 
 class NFATransitionTable
 {
