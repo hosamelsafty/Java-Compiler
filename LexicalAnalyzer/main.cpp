@@ -48,7 +48,7 @@ int main(int argc, char** argv)
     // Write ErrorLog somewhere (in a file for example)
     // input: ErrorLog, filename
     // output: file containing error messages one per line.
-    std::string errorLogFilename;
+    std::string errorLogFilename = "errors.txt";
     writeErrorLogToFile(errorLog, errorLogFilename);
 
     return 0;
