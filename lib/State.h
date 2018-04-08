@@ -10,10 +10,12 @@ enum Type
     ACCEPTING,
 };
 
+typedef int StateId;
+
 class State
 {
-    static int new_id;
-    int id;
+    static StateId new_id;
+    StateId id;
 
     std::string tokenType;
     int priority;
@@ -21,8 +23,8 @@ class State
     Type type;
 public:
     State();
-    State(int number);
-    int getID() const;
+    State(StateId number);
+    StateId getID() const;
     void setType(Type t);
     Type getType() const;
 
@@ -32,13 +34,15 @@ public:
     void setPriority(int p);
     int getPriority() const;
 
-    const State &operator=(const State &s);
+    //const State &operator=(const State &s);
+
     bool operator==(const State & s) const;
-    static int newID()
+    static StateId newID()
     {
         return new_id++;
     }
 };
+
 bool operator<(const State &lhs, const State &rhs);
 
 #endif // State_H

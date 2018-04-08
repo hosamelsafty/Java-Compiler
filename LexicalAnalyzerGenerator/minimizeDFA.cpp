@@ -40,61 +40,61 @@ bool is_equal(
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 DFATransitionTable minimizeDFA(const DFATransitionTable &dfa)
 {
-    std::vector<State> states = dfa.getStates();
-    std::vector<
-        std::vector<std::pair<State, std::map<char, State> > > > classes;
-    classes.push_back(getNotAcceptedStates(dfa, states));
-    classes.push_back(getAcceptedStates(dfa, states));
-    bool finish = false;
-    unsigned long long int end = 2;
-    while (!finish)
-    {
-        finish = true;
-        matchStates(dfa, classes);
-        for (int i = 0; i < end; i++)
-        {
-            std::vector<
-                std::vector<
-                std::pair<State,
-                std::map<char, State> > > > groups =
-                split(classes, end, classes[i]);
-            unsigned long long int len = groups.size();
-            for (int j = 0; j < len; j++)
-            {
-                classes.push_back(groups[j]);
-            }
-        }
-        if (classes.size() != 2 * end)
-        {
-            finish = false;
-        }
-        for (int i = 0; i < end; i++)
-        {
-            classes.erase(classes.begin());
-        }
-        end = classes.size();
-    }
-    matchStates(dfa, classes);
+    //std::vector<State> states = dfa.getStates();
+    //std::vector<
+    //    std::vector<std::pair<State, std::map<char, State> > > > classes;
+    //classes.push_back(getNotAcceptedStates(dfa, states));
+    //classes.push_back(getAcceptedStates(dfa, states));
+    //bool finish = false;
+    //unsigned long long int end = 2;
+    //while (!finish)
+    //{
+    //    finish = true;
+    //    matchStates(dfa, classes);
+    //    for (int i = 0; i < end; i++)
+    //    {
+    //        std::vector<
+    //            std::vector<
+    //            std::pair<State,
+    //            std::map<char, State> > > > groups =
+    //            split(classes, end, classes[i]);
+    //        unsigned long long int len = groups.size();
+    //        for (int j = 0; j < len; j++)
+    //        {
+    //            classes.push_back(groups[j]);
+    //        }
+    //    }
+    //    if (classes.size() != 2 * end)
+    //    {
+    //        finish = false;
+    //    }
+    //    for (int i = 0; i < end; i++)
+    //    {
+    //        classes.erase(classes.begin());
+    //    }
+    //    end = classes.size();
+    //}
+    //matchStates(dfa, classes);
     DFATransitionTable min_dfa;
-    unsigned long long int no_states = classes.size();
-    std::vector<State> _states(no_states); // [no_states];
-    for (int i = 0; i < no_states; i++)
-    {
-        _states[i] = State(i);
-        _states[i].setType(classes[i][0].first.getType());
-    }
-    for (int i = 0; i < no_states; i++)
-    {
-        std::map<char, State> trans = dfa.getMapping(
-            classes[i][0].first);
-        for (auto &pair : trans)
-        {
-            int class_id = findClass(classes, end,
-                trans[pair.first].getID());
-            min_dfa.add(_states[i], pair.first,
-                _states[class_id]);
-        }
-    }
+    //unsigned long long int no_states = classes.size();
+    //std::vector<State> _states(no_states); // [no_states];
+    //for (int i = 0; i < no_states; i++)
+    //{
+    //    _states[i] = State(i);
+    //    _states[i].setType(classes[i][0].first.getType());
+    //}
+    //for (int i = 0; i < no_states; i++)
+    //{
+    //    std::map<char, State> trans = dfa.getMapping(
+    //        classes[i][0].first);
+    //    for (auto &pair : trans)
+    //    {
+    //        int class_id = findClass(classes, end,
+    //            trans[pair.first].getID());
+    //        min_dfa.add(_states[i], pair.first,
+    //            _states[class_id]);
+    //    }
+    //}
     return min_dfa;
 }
 
@@ -137,21 +137,21 @@ void matchStates(const DFATransitionTable &dfa,
     std::vector<
     std::pair<State, std::map<char, State> > > > &classes)
 {
-    unsigned long long int end = classes.size();
-    for (int i = 0; i < end; i++)
-    {
-        unsigned long long int n = classes[i].size();
-        for (int j = 0; j < n; j++)
-        {
-            std::map<char, State> trans = dfa.getMapping(
-                classes[i][j].first);
-            for (auto &pair : trans)
-            {
-                classes[i][j].second[pair.first] = findClass(
-                    classes, end, pair.second.getID());
-            }
-        }
-    }
+    //unsigned long long int end = classes.size();
+    //for (int i = 0; i < end; i++)
+    //{
+    //    unsigned long long int n = classes[i].size();
+    //    for (int j = 0; j < n; j++)
+    //    {
+    //        std::map<char, State> trans = dfa.getMapping(
+    //            classes[i][j].first);
+    //        for (auto &pair : trans)
+    //        {
+    //            classes[i][j].second[pair.first] = findClass(
+    //                classes, end, pair.second.getID());
+    //        }
+    //    }
+    //}
 }
 
 int findClass(

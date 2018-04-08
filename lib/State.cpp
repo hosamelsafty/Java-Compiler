@@ -1,14 +1,14 @@
 #include "State.h"
 #include <iostream>
 
-int State::new_id = 0;
+StateId State::new_id = 0;
 
 State::State()
     : id(State::newID()), type(REGULAR), priority(0)
 {
 }
 
-State::State(int number)
+State::State(StateId number)
     : id(number), type(REGULAR), priority(0)
 {
 }
@@ -52,10 +52,10 @@ bool operator<(const State &lhs, const State &rhs)
     return lhs.getID() < rhs.getID();
 }
 
-const State &State::operator=(const State &s)
-{
-    id = s.getID();
-    type = s.getType();
-
-    return *this;
-}
+//const State &State::operator=(const State &s)
+//{
+//    id = s.getID();
+//    type = s.getType();
+//
+//    return *this;
+//}

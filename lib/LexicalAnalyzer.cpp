@@ -3,6 +3,8 @@
 #include <sstream>
 #include <assert.h>
 
+#include "ErrorLog.h"
+
 LexicalAnalyzer::LexicalAnalyzer(
     DFATransitionTable &transitionTable,
     std::istream& in,
@@ -20,25 +22,25 @@ LexicalAnalyzer::~LexicalAnalyzer()
 
 Token* LexicalAnalyzer::nextToken()
 {
-    State currState = dfa_t.getStartingState();
-    State nextState = currState;
+    StateId currState = dfa_t.getStartingState();
+    StateId nextState = currState;
 
     char c = EOF;
-    State lastAcceptedState;
+    StateId lastAcceptedState;
     bool accepted = false;
     std::string lexem, lastAcceptedLexem;
     std::string undefinedString;
 
-    int startPos = _streamWrapper.getPos();
+    const int startPos = _streamWrapper.getPos();
 
     // Loop getting single characters
     while ((c = _streamWrapper.getNext()) != EOF)
     {
         lexem += c;
 
-        if (dfa_t.checkTransition(currState, c)) // a transition found.
+        if (dfa_t.hasTransition(currState, c)) // a transition found.
         {
-            nextState = dfa_t.nextState(currState, c);
+            nextState = dfa_t.move(currState, c);
             //indx++;
 
             if (dfa_t.isAcceptingState(nextState))
@@ -72,7 +74,8 @@ Token* LexicalAnalyzer::nextToken()
     {
         // Token Type according to lastAcceptedState
         // position = startPos + undefinedString.size()
-        token = new Token(lastAcceptedState.getTokenType(), lastAcceptedLexem);
+        State acceptedState = dfa_t.getState(lastAcceptedState);
+        token = new Token(acceptedState.getTokenType(), lastAcceptedLexem);
 
         if (lexem.size() > lastAcceptedLexem.size())
             _streamWrapper.putFront(lexem.substr(lastAcceptedLexem.size(), lexem.size() - lastAcceptedLexem.size()));
@@ -88,6 +91,7 @@ Token* LexicalAnalyzer::nextToken()
     {
         // Error: Undefined input of /undefinedString/
         // position = startPosition
+        errorLog->add(undefinedString, startPos, startPos, "Undefined input");
     }
 
     return token;
