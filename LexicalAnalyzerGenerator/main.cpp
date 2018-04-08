@@ -25,9 +25,9 @@ int main(int argc, char** argv)
 
     DFATransitionTable dfa1 = convertNFAToDFA(nfa);
 
-    DFATransitionTable minDFA = minimizeDFA(dfa1);
+    //DFATransitionTable minDFA = minimizeDFA(dfa1);
 
-    writeTransitionTable(minDFA, "dfa.json");
+    writeTransitionTable(dfa1, "dfa.json");
 
     cout << endl << "Transition table written to dfa.json" << endl;
 

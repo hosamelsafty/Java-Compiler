@@ -3,6 +3,6 @@
 
 #include "lib/LexicalAnalyzer.h"
 
-void printTokensToScreen(const LexicalAnalyzer &lexicalAnalyzer);
+void printTokensToScreen(LexicalAnalyzer &lexicalAnalyzer);
 
 #endif // printTokensToScreen_H

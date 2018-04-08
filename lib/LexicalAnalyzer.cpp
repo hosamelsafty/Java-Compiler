@@ -72,7 +72,7 @@ Token* LexicalAnalyzer::nextToken()
     {
         // Token Type according to lastAcceptedState
         // position = startPos + undefinedString.size()
-        token = new Token("Token Type", lastAcceptedLexem);
+        token = new Token(lastAcceptedState.getTokenType(), lastAcceptedLexem);
 
         if (lexem.size() > lastAcceptedLexem.size())
             _streamWrapper.putFront(lexem.substr(lastAcceptedLexem.size(), lexem.size() - lastAcceptedLexem.size()));

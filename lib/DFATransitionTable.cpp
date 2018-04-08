@@ -16,6 +16,8 @@ struct DFATransitionTable::impl
     std::set<State> endingStates;
 
     std::map < State, std::map<char, State > > table;
+
+
 };
 
 DFATransitionTable::DFATransitionTable()
@@ -132,7 +134,13 @@ std::ostream& operator<<(std::ostream& out, const DFATransitionTable &transition
 
     for (auto & state : transitionTable.getAcceptingStates())
     {
-        acceptingStates.PushBack(state.getID(), allocator);
+        Value s;
+        s.SetObject();
+
+        s.AddMember("id", state.getID(), allocator);
+        s.AddMember("tokenType", state.getTokenType(), allocator);
+
+        acceptingStates.PushBack(s, allocator);
     }
 
     d.AddMember("acceptingStates", acceptingStates, allocator);
@@ -179,7 +187,9 @@ std::istream& operator >> (std::istream& in, DFATransitionTable &transitionTable
 
     for (auto & value : d["acceptingStates"].GetArray())
     {
-        transitionTable.addAcceptingState(State(value.GetInt()));
+        State s(value["id"].GetInt());
+        s.setTokenType(value["tokenType"].GetString());
+        transitionTable.addAcceptingState(s);
     }
 
     transitionTable.m_d->table = table;
