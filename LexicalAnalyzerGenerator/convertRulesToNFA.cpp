@@ -56,6 +56,7 @@ struct node
 
 NFATransitionTable charNFA(char c);
 void windUpLastUnion(stack<node> &nodeStack);
+void windupPreviousConcats(stack<node> &nodeStack);
 
 NFATransitionTable nfaOfRegex(const string &regex)
 {
@@ -81,20 +82,21 @@ NFATransitionTable nfaOfRegex(const string &regex)
             }
 
             NFATransitionTable tempNFA = charNFA(ch);
-            if (nodeStack.size())
-            {
-                if (!nodeStack.top().isOp)
-                {
-                    tempNFA = nodeStack.top().nfa.opConcat(tempNFA);
-                    nodeStack.pop();
-                }
-            }
+            //if (nodeStack.size())
+            //{
+            //    if (!nodeStack.top().isOp)
+            //    {
+            //        tempNFA = nodeStack.top().nfa.opConcat(tempNFA);
+            //        nodeStack.pop();
+            //    }
+            //}
             nodeStack.push(node(tempNFA));
             break;
         }
         case '|':
             assert(nodeStack.size() && !nodeStack.top().isOp);
 
+            windupPreviousConcats(nodeStack);
             windUpLastUnion(nodeStack); // find previous '|' and process it
 
             nodeStack.push(node('|'));
@@ -123,6 +125,7 @@ NFATransitionTable nfaOfRegex(const string &regex)
         case ')':
             assert(nodeStack.size() && !nodeStack.top().isOp);
 
+            windupPreviousConcats(nodeStack);
             windUpLastUnion(nodeStack); // find previous '|' and process it
 
             if (nodeStack.size() >= 2)
@@ -132,14 +135,14 @@ NFATransitionTable nfaOfRegex(const string &regex)
                 assert(nodeStack.top().isOp && nodeStack.top().op == '(');
                 nodeStack.pop();
 
-                if (nodeStack.size())
-                {
-                    if (!nodeStack.top().isOp)
-                    {
-                        temp.nfa = nodeStack.top().nfa.opConcat(temp.nfa);
-                        nodeStack.pop();
-                    }
-                }
+                //if (nodeStack.size())
+                //{
+                //    if (!nodeStack.top().isOp)
+                //    {
+                //        temp.nfa = nodeStack.top().nfa.opConcat(temp.nfa);
+                //        nodeStack.pop();
+                //    }
+                //}
 
                 nodeStack.push(temp);
             }
@@ -147,6 +150,7 @@ NFATransitionTable nfaOfRegex(const string &regex)
         }
     }
 
+    windupPreviousConcats(nodeStack);
     windUpLastUnion(nodeStack);
 
     if (nodeStack.empty())
@@ -170,6 +174,30 @@ NFATransitionTable charNFA(char c)
     nfa.addAcceptingStates(f);
     return nfa;
 }
+
+
+void windupPreviousConcats(stack<node> &nodeStack)
+{
+    assert(nodeStack.size() && !nodeStack.top().isOp);
+    while (nodeStack.size() >= 2)
+    {
+        node top = nodeStack.top();
+        nodeStack.pop();
+        if (!nodeStack.top().isOp)
+        {
+            node prevTop = nodeStack.top();
+            nodeStack.pop();
+            NFATransitionTable tempConcat = prevTop.nfa.opConcat(top.nfa);
+            nodeStack.push(node(tempConcat));
+        }
+        else
+        {
+            nodeStack.push(top);
+            break;
+        }
+    }
+}
+
 
 void windUpLastUnion(stack<node> &nodeStack)
 {

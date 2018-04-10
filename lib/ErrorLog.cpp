@@ -41,7 +41,7 @@ std::ostream& operator<<(std::ostream& out, const ErrorLog &errorLog)
 {
     for (auto &e : errorLog.m_d->errors)
     {
-        out << "Input:" << e.input
+        out << "Input: \"" << e.input << "\""
             << " line:" << e.line
             << " pos:"  << e.position
             << " msg:"  << e.message
