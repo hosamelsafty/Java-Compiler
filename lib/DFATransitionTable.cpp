@@ -4,7 +4,6 @@
 
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
 #include "rapidjson/istreamwrapper.h"
 #include "rapidjson/ostreamwrapper.h"
@@ -13,8 +12,8 @@
 
 struct DFATransitionTable::impl
 {
-	State startingState;
-	std::set<State> endingStates;
+    State startingState;
+    std::set<State> endingStates;
 
     std::map < State, std::map<char, State > > table;
 };
@@ -48,8 +47,8 @@ State DFATransitionTable::nextState(const State &currentState, char input) const
 
 bool DFATransitionTable::checkTransition (const State &currentState, char input) const
 {
-	std::map<char, State> table = m_d->table[currentState];
-	return table.find(input) != table.end();
+    std::map<char, State> table = m_d->table[currentState];
+    return table.find(input) != table.end();
 }
 
 std::vector<State> DFATransitionTable::getStates() const
@@ -69,39 +68,34 @@ std::map<char,State> DFATransitionTable::getMapping(const State& state) const
 
 void DFATransitionTable::setStartingState(const State &state)
 {
-	m_d->startingState = state;
+    m_d->startingState = state;
 }
 
 
 void DFATransitionTable::setAcceptingStates(const std::set<State> &states)
 {
-	m_d->endingStates = states;
+    m_d->endingStates = states;
 }
 
 void DFATransitionTable::addAcceptingState(const State &state)
 {
-	m_d->endingStates.insert(state);
+    m_d->endingStates.insert(state);
 }
 
 bool DFATransitionTable::isAcceptingState(const State &state) const
 {
-	for (auto& i : m_d->endingStates){
-		if (i == state)
-			return true;
-	}
-	return false;
+    return m_d->endingStates.find(state) != m_d->endingStates.end();
 }
 
 State DFATransitionTable::getStartingState() const
 {
-	return m_d->startingState;
+    return m_d->startingState;
 }
 
 std::set<State> DFATransitionTable::getAcceptingStates() const
 {
-	return m_d->endingStates;
+    return m_d->endingStates;
 }
-
 
 std::ostream& operator<<(std::ostream& out, const DFATransitionTable &transitionTable)
 {
@@ -129,17 +123,17 @@ std::ostream& operator<<(std::ostream& out, const DFATransitionTable &transition
         d["tt"].PushBack(row, allocator);
     }
 
-	d.AddMember("startState", transitionTable.getStartingState().getID(), allocator);
+    d.AddMember("startState", transitionTable.getStartingState().getID(), allocator);
 
-	Value acceptingStates;
-	acceptingStates.SetArray();
+    Value acceptingStates;
+    acceptingStates.SetArray();
 
-	for (auto & state : transitionTable.getAcceptingStates())
-	{
-		acceptingStates.PushBack(state.getID(), allocator);
-	}
+    for (auto & state : transitionTable.getAcceptingStates())
+    {
+        acceptingStates.PushBack(state.getID(), allocator);
+    }
 
-	d.AddMember("acceptingStates", acceptingStates, allocator);
+    d.AddMember("acceptingStates", acceptingStates, allocator);
 
     OStreamWrapper osw(out);
     PrettyWriter<OStreamWrapper> writer(osw);
@@ -176,12 +170,12 @@ std::istream& operator>>(std::istream& in, DFATransitionTable &transitionTable)
         }
     }
 
-	transitionTable.setStartingState(State(d["startState"].GetInt()));
+    transitionTable.setStartingState(State(d["startState"].GetInt()));
 
-	for (auto & value : d["acceptingStates"].GetArray())
-	{
-		transitionTable.addAcceptingState(State(value.GetInt()));
-	}
+    for (auto & value : d["acceptingStates"].GetArray())
+    {
+        transitionTable.addAcceptingState(State(value.GetInt()));
+    }
 
     transitionTable.m_d->table = table;
 

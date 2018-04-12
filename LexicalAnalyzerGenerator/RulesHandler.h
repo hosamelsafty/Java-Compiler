@@ -17,16 +17,17 @@ class RulesHandler {
     string fileName;
 public:
     RulesHandler(const std::string &filename);
-    vector<pair<string,string > >regExp;
+    vector<pair<string,string > > regExp;
     vector<pair<string,string > > regDef;
-	vector<string> punc;
-    vector<string>keyword;
-    vector<string>  format_keyword(string line);
-    string expand_score(string line);
+    static vector<string>punc;
+    static vector<string>keyword;
+    vector<Token>symbol_table;
+    string expand_slash(string line);
     void edit_expression_from_definition();
     string expand_seq(char from,char to);
     void replaceAll(std::string& str, const std::string& from, const std::string& to) ;
     void add_in_vector(string line,string type);
+    void add_in_symbol_table(string line,string type);
     void init_rules();
     size_t split(const std::string &txt, std::vector<std::string> &strs, char ch);
     string formatRegEx(string regex) ;

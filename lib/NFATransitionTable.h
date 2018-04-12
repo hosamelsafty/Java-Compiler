@@ -10,6 +10,7 @@
 #include <tuple>
 
 #include "State.h"
+const char EPS = '\17';
 
 class NFATransitionTable
 {
@@ -19,7 +20,6 @@ public:
 
 	// Epsilon symbol need to be defined
 	// (device control 1) This is a control character that is not likely to exist in a file
-	static const char EPS = '\17';
 
 	typedef std::tuple<State, Input, State> Transition;
 
@@ -49,6 +49,10 @@ public:
 	std::set<State> getStartingStates() const;
 	std::set<State> getAcceptingStates() const;
 
+	std::set<char> transitionAlphabet(const std::set<State> &) const;
+	bool isAcceptingSet (const std::set<State> &states) const;
+
+    static NFATransitionTable multiUnion(const std::vector<NFATransitionTable>& nfas);
 	NFATransitionTable opUnion(const NFATransitionTable &rhs) const;
 	NFATransitionTable opConcat(const NFATransitionTable &rhs) const;
 	NFATransitionTable opPlus() const;

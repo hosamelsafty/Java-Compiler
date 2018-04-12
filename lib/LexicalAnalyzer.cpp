@@ -1,6 +1,8 @@
 #include "LexicalAnalyzer.h"
 #include "ErrorLog.h"
+#include "LexicalAnalyzerGenerator/RulesHandler.h"
 #include <sstream>
+#include <algorithm>
 
 LexicalAnalyzer::LexicalAnalyzer(
 		DFATransitionTable &transitionTable, std::istream& in,
@@ -20,12 +22,31 @@ void LexicalAnalyzer::getToken(std::istream& io,
 	char c;
 	State nextState;
 	while (io.peek() != EOF && io.get(c)) { // loop getting single characters
-//		if (c is in Punctuations and not an '\n')
-//			add it to lexem and return.
-//			if it \n then  noLine++;
+		if (c == '\n' && lexem.size() == 0) {
+			noLine++;
+			continue;
+		} else if (c == '\n') {
+			indx++;
+			lexem += c;
+			return;
+		}
+		if (c == ' ' && lexem.size() == 0) {
+			continue;
+		} else if (c == ' ') {
+			indx++;
+			lexem += c;
+			return;
+		}
+		for (string s : RulesHandler::punc) {
+			if (s[0] == c) {
+				indx++;
+				lexem += c;
+				return;
+			}
+		}
 		if (dfa_t.checkTransition(currState, c)) { // a transition found.
 			nextState = dfa_t.nextState(currState, c);
-			indx++;
+ 			indx++;
 			lexem += c;
 			if (dfa_t.isAcceptingState(nextState)) {
 				lastAcceptedState = nextState;
@@ -38,6 +59,9 @@ void LexicalAnalyzer::getToken(std::istream& io,
 	}
 }
 Token* LexicalAnalyzer::nextToken() {
+	if (remainingInput.size() == 0  && input.peek() == EOF) {
+		return NULL;
+	}
 	std::string lexem = "";
 	int indx = 0, lastAccIndx;
 	State currState = dfa_t.getStartingState();
@@ -49,19 +73,33 @@ Token* LexicalAnalyzer::nextToken() {
 				lastAcceptedState);
 		ss.clear();
 	}
-//	if (lexem.size() == 1 && lexem[0] is in Punctuations)
-//	Token* t = new Token ("Punctuation",lexem);
 	getToken(input, lexem, indx, lastAccIndx, currState,
 			lastAcceptedState);
 	if (!lexem.size()) // end of input
-		return NULL;
+		return new Token("", "");
+	if (lexem.size() == 1) {
+		for (string s : RulesHandler::punc) {	// punctuation.
+			if (lexem[0] == s[0]) {
+				Token* t = new Token(lexem, lexem);
+				return t;
+			}
+		}
+	}
 	if (lastAcceptedState.getID() == -1) { // end of input and an Error.
 		errLog.add(lexem, noLine, "No matched Token");
-		return NULL;
+		return new Token("", "");
 	}
 	remainingInput = lexem.substr(lastAccIndx,
 			lexem.size() - lastAccIndx);
-	Token* t = new Token("Token1", lexem.substr(0, lastAccIndx));
-
+	string value = lexem.substr(0, lastAccIndx);
+	string type = AcceptedTokenMap::getDFAMapping(
+			lastAcceptedState);
+	for (auto& key : RulesHandler::keyword) {
+		if (key == value) {
+			type = key;
+			break;
+		}
+	}
+	Token* t = new Token(type, value);
 	return t;
 }

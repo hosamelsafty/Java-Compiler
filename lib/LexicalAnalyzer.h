@@ -2,6 +2,7 @@
 #define LexicalAnalyzer_H
 
 #include "DFATransitionTable.h"
+#include "AcceptedTokenMap.h"
 #include "Token.h"
 
 #include <iostream>

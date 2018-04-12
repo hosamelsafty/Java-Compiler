@@ -1,1 +1,5 @@
-Line = 1, lexem = 111, message = No matched Token
+Line = 1, lexem = 1 , message = No matched Token
+Line = 2, lexem = 0), message = No matched Token
+Line = 4, lexem = 1, message = No matched Token
+Line = 7, lexem = 0;, message = No matched Token
+Line = 9, lexem = 0;, message = No matched Token

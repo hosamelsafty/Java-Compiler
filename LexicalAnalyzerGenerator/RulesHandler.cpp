@@ -21,6 +21,11 @@ RulesHandler::RulesHandler(const std::string &filename)
     : fileName(filename)  {
 }
 
+bool isOperand(char c){
+    return c==' '||c=='*'||c=='+'||c=='|';
+}
+
+
 // trim from start
 static inline std::string &ltrim(std::string &s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(),
@@ -43,13 +48,13 @@ static inline std::string &trim(std::string &s) {
 void RulesHandler::edit_expression_from_definition(){
     for (int i = 0; i < regDef.size(); ++i) {
         for (int j = i+1; j < regDef.size(); ++j) {
-            replaceAll(regDef.at(j).second, regDef.at(i).first, regDef.at(i).second);
+            replaceAll(regDef.at(j).second, regDef.at(i).first, "("+regDef.at(i).second+ ")");
         }
 
     }
     for (int i = regDef.size()-1; i >= 0; --i) {
         for (int j = 0; j < regExp.size(); ++j) {
-            replaceAll(regExp.at(j).second, regDef.at(i).first, regDef.at(i).second);
+            replaceAll(regExp.at(j).second, regDef.at(i).first, "("+regDef.at(i).second+")");
         }
     }
 }
@@ -72,7 +77,8 @@ size_t RulesHandler::split(const std::string &txt, std::vector<std::string> &str
     strs.push_back( txt.substr( initialPos, std::min( pos, txt.size() ) - initialPos + 1 ) );
     return strs.size();
 }
-
+vector<string> RulesHandler::punc;
+vector<string> RulesHandler::keyword;
 /* Main method that do all parsing before generating NFA and initialise all lists. */
 void RulesHandler::init_rules() {
     string line;
@@ -82,16 +88,28 @@ void RulesHandler::init_rules() {
         return;
     }
     while(getline (file,line)){
-        if(line.at(0)=='['){
-            line=line.substr(1,line.length()-2);
-            trim(line);
-            add_in_vector(line,"punctuation");
-        }
-        else if(line.at(0)=='{'){
-            line=line.substr(1,line.length()-2);
-            trim(line);
-            add_in_vector(line,"keyword");
-        }
+    	if(line.at(0)=='['){
+			line=line.substr(1,line.length()-2);
+			trim(line);
+			add_in_vector(line,"punctuation");
+		}
+		else if(line.at(0)=='{'){
+			line=line.substr(1,line.length()-2);
+			trim(line);
+			add_in_vector(line,"keyword");
+		}
+//        if(line.at(0)=='['){
+//            line=line.substr(1,line.length()-2);
+//            trim(line);
+//            add_in_symbol_table(line,"keyword");
+//            keyword.push_back(line);
+//        }
+//        else if(line.at(0)=='{'){
+//            line=line.substr(1,line.length()-2);
+//            trim(line);
+//            add_in_symbol_table(line,"punctuation");
+//            punc.push_back(line);
+//        }
         else{
             replaceAll(line, " ", "");
             replaceAll(line, "\\=", "=");
@@ -103,7 +121,7 @@ void RulesHandler::init_rules() {
                 }
                 if(line.at(i)=='='){
                     string exp_name=line.substr(0,i);
-                    string regular_expanded=expand_score(line.substr(i+1,line.length()));
+                    string regular_expanded=expand_slash(line.substr(i+1,line.length()));
 
                     pair <string,string> temp (exp_name,regular_expanded);
                     regDef.push_back(temp);
@@ -119,8 +137,27 @@ void RulesHandler::init_rules() {
     edit_expression_from_definition();
     for (int i = 0; i < regExp.size(); ++i) {
         regExp[i].second=infixToPostfix(regExp[i].second);
+        cout<< regExp[i].first << " :" << regExp[i].second << endl;
     }
 }
+
+vector<string> punc;
+vector<string> keyword;
+
+void RulesHandler::add_in_vector(string line,string type){
+    vector<string> res;
+    split( line, res, ' ' );
+    for (int i = 0; i < res.size(); ++i) {
+        replaceAll(res[i], "\\", "");
+        if(type=="keyword"){
+        	RulesHandler::keyword.push_back(res[i]);
+        }
+        else if(type == "punctuation"){
+        	RulesHandler::punc.push_back(res[i]);
+        }
+    }
+}
+
 void RulesHandler::replaceAll(std::string& str, const std::string& from, const std::string& to) {
     if(from.empty())
         return;
@@ -143,7 +180,7 @@ string RulesHandler::expand_seq(char from,char to){
     return temp;
 }
 
-string RulesHandler::expand_score(string line){
+string RulesHandler::expand_slash(string line){
 
     string temp="";
     for (int i = 0; i < line.length(); ++i) {
@@ -159,37 +196,34 @@ string RulesHandler::expand_score(string line){
     }
     return temp;
 }
-void RulesHandler::add_in_vector(string line,string type){
+void RulesHandler::add_in_symbol_table(string line,string type){
     vector<string> res;
     split( line, res, ' ' );
     for (int i = 0; i < res.size(); ++i) {
         replaceAll(res[i], "\\", "");
-        if(type=="keyword"){
-        	keyword.push_back(res[i]);
-        }
-        else if(type == "punctuation"){
-        	punc.push_back(res[i]);
-        }
+        Token token(type,res[i]);
+        symbol_table.push_back(token);
     }
 }
 int  RulesHandler::getPrecedence(char c){
 
     switch (c) {
         case '(':
-            return 1;
+            return 7;
             break;
-        case '|':
+        case '*':
+            return 2;
+            break;
+        case '+':
             return 2;
             break;
         case ' ':
             return 3;
             break;
-        case '*':
+        case '|':
             return 4;
             break;
-        case '+':
-            return 4;
-            break;
+
         default:
             return 6;
             break;
@@ -221,20 +255,10 @@ string RulesHandler::formatRegEx(string regex) {
     return res;
 }
 
-vector<string>  RulesHandler::format_keyword(string line){
-    vector<string> res;
-    split( line, res, ' ' );
-    for (int i = 0; i < res.size(); ++i) {
-        replaceAll(res[i], "\\", "");
-        res[i]=infixToPostfix(res[i]);
-    }
-    return res;
-}
 string RulesHandler::infixToPostfix(string regex) {
     string postfix = "";
 
     stack<char> mystack;
-
     string formattedRegEx = formatRegEx(regex);
 
     for (int i=0;i<formattedRegEx.length();i++) {
@@ -242,7 +266,6 @@ string RulesHandler::infixToPostfix(string regex) {
             case '(':
                 mystack.push(formattedRegEx[i]);
                 break;
-
             case ')':
                 while(mystack.top() != '(') {
                     postfix += mystack.top();
@@ -252,28 +275,39 @@ string RulesHandler::infixToPostfix(string regex) {
                 break;
 
             default:
-                while(mystack.size() > 0){
-                    char peekedChar = mystack.top();
-
-                    int peekedCharPrecedence = getPrecedence(peekedChar);
-                    int currentCharPrecedence = getPrecedence(formattedRegEx[i]);
-
-                    if (peekedCharPrecedence >= currentCharPrecedence) {
-                        postfix += mystack.top();
-                        mystack.pop();
-                    } else {
-                        break;
-                    }
+                if(formattedRegEx[i] == '\\'){
+                    postfix += formattedRegEx[i++];
+                    postfix += formattedRegEx[i];
+                    break;
                 }
-                mystack.push(formattedRegEx[i]);
-                break;
-        }
+                else if(!isOperand(formattedRegEx[i])){
+                    postfix += formattedRegEx[i];
+                    break;
+                }
+                else {
+                    while(mystack.size() > 0){
+                        char peekedChar = mystack.top();
 
+                        int peekedCharPrecedence = getPrecedence(peekedChar);
+                        int currentCharPrecedence = getPrecedence(formattedRegEx[i]);
+
+                        if (peekedCharPrecedence < currentCharPrecedence) {
+                            postfix += mystack.top();
+                            mystack.pop();
+                        } else {
+                            break;
+                        }
+                    }
+                    mystack.push(formattedRegEx[i]);
+                    break;
+                }
+        }
     }
     while (mystack.size() > 0){
         postfix += mystack.top();
         mystack.pop();
     }
+
     return postfix;
 }
 

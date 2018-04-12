@@ -117,3 +117,55 @@
 //
 //	return 0;
 //}
+#include "minimizeDFA.h"
+#include "convertNFAToDFA.h"
+#include "convertRulesToNFA.h"
+#include "writeTransitionTable.h"
+#include "RulesHandler.h"
+#include "lib/NFATransitionTable.h"
+#include "lib/ErrorLog.h"
+#include "lib/LexicalAnalyzer.h"
+#include "LexicalAnalyzer/writeErrorLogToFile.h"
+#include "LexicalAnalyzer/printTokensToScreen.h"
+#include <fstream>
+#include <string>
+
+int main(int argc, char** argv)
+{
+    using namespace std;
+    // This is Tested ##
+    NFATransitionTable nfa = convertRulesToNFA("/home/omar/eclipse-workspace/JavaCompiler/src/LexicalAnalyzerGenerator/regularExpressions.txt");
+    DFATransitionTable dfa = convertNFAToDFA(nfa);
+    DFATransitionTable min_dfa = minimizeDFA(dfa);
+//	for (auto& s : dfa.getAcceptingStates()) {
+//		std::cout << "acc state = " << s.getID() << " token = "
+//				<< AcceptedTokenMap::getDFAMapping(s) << endl;
+//	}
+//	for(auto& s:RulesHandler::punc){
+//		cout << s << endl;
+//	}
+    std::string codeFilename = "/home/omar/eclipse-workspace/JavaCompiler/src/LexicalAnalyzer/test_2.txt";
+	std::ifstream codeFile;
+	// TODO Check for return value
+	codeFile.open(codeFilename);
+	ErrorLog errorLog;
+	LexicalAnalyzer lexicalAnalyzer(min_dfa, codeFile, errorLog);
+	writeTransitionTable(min_dfa,"miniDFA.json");
+	printTokensToScreen(lexicalAnalyzer);
+
+	// TODO write ErrorLog somewhere (in a file for example)
+	// input: ErrorLog, filename
+	// output: file containing error messages one per line.
+	std::string errorLogFilename = "errorLog.txt";
+	writeErrorLogToFile(errorLog, errorLogFilename);
+//    for (State s:dfa.getStates()) {
+//        cout << "StateID:" << s.getID() << " , type:" << s.getType() << endl;
+//        for(auto& pair: dfa.getMapping(s)){
+//            cout << "Under char '" << pair.first<< "' , it goes to stateID:" << pair.second.getID()<<endl;
+//        }
+//    }
+
+    cout << "-------------------------------------------" << endl;
+
+    return 0;
+}
