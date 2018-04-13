@@ -17,7 +17,6 @@ public:
     DFATransitionTable(const DFATransitionTable &);
     ~DFATransitionTable();
 
-
     void storeState(const State &s);
     State getState(StateId stateId) const;
     std::map<StateId, State> getStates() const;
@@ -35,33 +34,6 @@ public:
     std::set<StateId> getAcceptingStateIds() const;
 
     bool isAcceptingState(StateId stateId) const;
-
-
-
-
-
-
-
-
-
-
-
-    //void add(const State &, char input, const State &);
-
-    //State nextState(const State &, char input) const;
-    //bool checkTransition(const State &, char input) const;
-
-    //std::vector<State> getStates() const;
-    //std::map<char, State> getMapping(const State&) const;
-    //// edited by Omar Kassem
-    //void setStartingState(const State &state);
-
-    //void setAcceptingStates(const std::set<State> &states);
-    //void addAcceptingState(const State &state);
-
-    //bool isAcceptingState(const State &state) const;
-    //State getStartingState() const;
-    //std::set<State> getAcceptingStates() const;
 
 private:
     struct impl;

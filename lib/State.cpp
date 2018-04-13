@@ -3,24 +3,25 @@
 
 StateId State::new_id = 0;
 
+StateId State::newID()
+{
+    return new_id++;
+}
+
 State::State()
-    : id(State::newID()), type(REGULAR), priority(0)
+    : id(State::newID()), priority(0)
 {
 }
 
 State::State(StateId number)
-    : id(number), type(REGULAR), priority(0)
+    : id(number), priority(0)
 {
 }
 
-void State::setType(Type t)
+int State::getID() const
 {
-    type = t;
+    return id;
 }
-
-Type State::getType() const { return type; }
-
-int State::getID()const { return id; }
 
 void State::setTokenType(std::string str)
 {
@@ -51,11 +52,3 @@ bool operator<(const State &lhs, const State &rhs)
 {
     return lhs.getID() < rhs.getID();
 }
-
-//const State &State::operator=(const State &s)
-//{
-//    id = s.getID();
-//    type = s.getType();
-//
-//    return *this;
-//}

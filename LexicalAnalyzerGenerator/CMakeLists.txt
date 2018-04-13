@@ -16,7 +16,7 @@ file(GLOB here_SRC
     "*.cpp"
 )
 
-add_executable(LexicalAnalyzerGenerator ${here_SRC} ${lib_SRC} ${rapidjson_SRC} RulesHandler.cpp RulesHandler.h ../lib/AcceptedTokenMap.cpp ../lib/AcceptedTokenMap.h)
+add_executable(LexicalAnalyzerGenerator ${here_SRC} ${lib_SRC} ${rapidjson_SRC})
 
 set_target_properties( LexicalAnalyzerGenerator
     PROPERTIES

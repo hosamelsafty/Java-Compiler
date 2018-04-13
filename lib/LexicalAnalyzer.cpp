@@ -1,18 +1,35 @@
 #include "LexicalAnalyzer.h"
-#include "ErrorLog.h"
+
 #include <sstream>
 #include <assert.h>
 
 #include "ErrorLog.h"
+#include "StreamWrapper.h"
+#include "DFATransitionTable.h"
+
+struct LexicalAnalyzer::impl
+{
+    DFATransitionTable dfa;
+    StreamWrapper _streamWrapper;
+    ErrorLog * errorLog;
+    SymbolTable * symbolTable;
+
+    impl(const DFATransitionTable &dfa,
+        std::istream& in,
+        ErrorLog *errorLog,
+        SymbolTable *symbolTable)
+        : dfa(dfa), _streamWrapper(in), errorLog(errorLog), symbolTable(symbolTable)
+    {
+    }
+};
 
 LexicalAnalyzer::LexicalAnalyzer(
-    DFATransitionTable &transitionTable,
+    const DFATransitionTable &dfa,
     std::istream& in,
     ErrorLog *errorLog,
     SymbolTable *symbolTable)
-    : dfa_t(transitionTable), _streamWrapper(in), errorLog(errorLog), symbolTable(symbolTable)
+    : m_d(std::make_unique<impl>(dfa, in, errorLog, symbolTable))
 {
-
 }
 
 LexicalAnalyzer::~LexicalAnalyzer()
@@ -22,7 +39,7 @@ LexicalAnalyzer::~LexicalAnalyzer()
 
 Token* LexicalAnalyzer::nextToken()
 {
-    StateId currState = dfa_t.getStartingState();
+    StateId currState = m_d->dfa.getStartingState();
     StateId nextState = currState;
 
     char c = EOF;
@@ -31,23 +48,21 @@ Token* LexicalAnalyzer::nextToken()
     std::string lexem, lastAcceptedLexem;
     std::string undefinedString;
 
-    const int startPos = _streamWrapper.getPos();
+    const int startPos = m_d->_streamWrapper.getPos();
 
     // Loop getting single characters
-    while ((c = _streamWrapper.getNext()) != EOF)
+    while ((c = m_d->_streamWrapper.getNext()) != EOF)
     {
         lexem += c;
 
-        if (dfa_t.hasTransition(currState, c)) // a transition found.
+        if (m_d->dfa.hasTransition(currState, c)) // a transition found.
         {
-            nextState = dfa_t.move(currState, c);
-            //indx++;
+            nextState = m_d->dfa.move(currState, c);
 
-            if (dfa_t.isAcceptingState(nextState))
+            if (m_d->dfa.isAcceptingState(nextState))
             {
                 lastAcceptedState = nextState;
                 lastAcceptedLexem = lexem;
-                //lastAccIndx = indx;
                 accepted = true;
             }
             currState = nextState;
@@ -61,9 +76,9 @@ Token* LexicalAnalyzer::nextToken()
             // Error: Undefined input of /lexem/
             // Recover by removing the first char and start again
             undefinedString += lexem[0];
-            _streamWrapper.putFront(lexem.substr(1, lexem.size() - 1));
+            m_d->_streamWrapper.putFront(lexem.substr(1, lexem.size() - 1));
             lexem = "";
-            currState = dfa_t.getStartingState();
+            currState = m_d->dfa.getStartingState();
             nextState = currState;
         }
     }
@@ -74,11 +89,11 @@ Token* LexicalAnalyzer::nextToken()
     {
         // Token Type according to lastAcceptedState
         // position = startPos + undefinedString.size()
-        State acceptedState = dfa_t.getState(lastAcceptedState);
+        State acceptedState = m_d->dfa.getState(lastAcceptedState);
         token = new Token(acceptedState.getTokenType(), lastAcceptedLexem);
 
         if (lexem.size() > lastAcceptedLexem.size())
-            _streamWrapper.putFront(lexem.substr(lastAcceptedLexem.size(), lexem.size() - lastAcceptedLexem.size()));
+            m_d->_streamWrapper.putFront(lexem.substr(lastAcceptedLexem.size(), lexem.size() - lastAcceptedLexem.size()));
     }
     else // No accepted input.
     {
@@ -91,7 +106,7 @@ Token* LexicalAnalyzer::nextToken()
     {
         // Error: Undefined input of /undefinedString/
         // position = startPosition
-        errorLog->add(undefinedString, startPos, startPos, "Undefined input");
+        m_d->errorLog->add(undefinedString, startPos, startPos, "Undefined input");
     }
 
     return token;

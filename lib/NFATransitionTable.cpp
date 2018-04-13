@@ -120,66 +120,53 @@ bool NFATransitionTable::impl::hasConcreteTransition(const State &state) const
     return false;
 }
 
+// OLDER VERSION
+//std::set<State> NFATransitionTable::epsClosure(const State &state) const
+//{
+//    std::set<State> resultColsure;
+//    std::set<State> toBeProcessed;
+//    std::set<State> doneProcessing;
+//
+//    State workingState;
+//
+//    toBeProcessed.insert(state);
+//
+//    while (!toBeProcessed.empty())
+//    {
+//        workingState = *toBeProcessed.begin();
+//        std::set<State> directClosure = m_d->directClosure(workingState, EPS);
+//
+//        if (m_d->hasConcreteTransition(*toBeProcessed.begin()))
+//        {
+//            resultColsure.insert(*toBeProcessed.begin());
+//        }
+//        else if (directClosure.empty())
+//        {
+//            resultColsure.insert(*toBeProcessed.begin());
+//        }
+//
+//        if (!directClosure.empty())
+//        {
+//            std::set<State> newInClosure;
+//
+//            std::set_difference(directClosure.begin(), directClosure.end(), doneProcessing.begin(), doneProcessing.end(),
+//                std::inserter(newInClosure, newInClosure.begin()));
+//
+//            if (!newInClosure.empty())
+//            {
+//                toBeProcessed.insert(newInClosure.begin(), newInClosure.end());
+//            }
+//        }
+//
+//        doneProcessing.insert(workingState);
+//        toBeProcessed.erase(workingState);
+//    }
+//
+//    return resultColsure;
+//}
+
 
 std::set<State> NFATransitionTable::epsClosure(const State &state) const
-{
-    std::set<State> resultColsure;
-    std::set<State> toBeProcessed;
-    std::set<State> doneProcessing;
-
-    State workingState;
-
-    toBeProcessed.insert(state);
-
-    while (!toBeProcessed.empty())
-    {
-        workingState = *toBeProcessed.begin();
-        std::set<State> directClosure = m_d->directClosure(workingState, EPS);
-
-        if (m_d->hasConcreteTransition(*toBeProcessed.begin()))
-        {
-            resultColsure.insert(*toBeProcessed.begin());
-        }
-        else if (directClosure.empty())
-        {
-            resultColsure.insert(*toBeProcessed.begin());
-        }
-
-        if (!directClosure.empty())
-        {
-            std::set<State> newInClosure;
-
-            std::set_difference(directClosure.begin(), directClosure.end(), doneProcessing.begin(), doneProcessing.end(),
-                std::inserter(newInClosure, newInClosure.begin()));
-
-            if (!newInClosure.empty())
-            {
-                toBeProcessed.insert(newInClosure.begin(), newInClosure.end());
-            }
-        }
-
-        doneProcessing.insert(workingState);
-        toBeProcessed.erase(workingState);
-    }
-
-    return resultColsure;
-}
-
-std::set<State> NFATransitionTable::epsClosure(const std::set<State> &states) const
-{
-    std::set<State> resultClosure;
-
-    for (auto && state : states)
-    {
-        // This is not efficient but correct
-        std::set<State> closure = epsClosure(state);
-        resultClosure.insert(closure.begin(), closure.end());
-    }
-
-    return resultClosure;
-}
-
-std::set<State> NFATransitionTable::epsClosure2(const State &state) const
 {
     std::set<State> resultColsure;
     std::set<State> toBeProcessed;
@@ -217,7 +204,7 @@ std::set<State> NFATransitionTable::epsClosure2(const State &state) const
     return resultColsure;
 }
 
-std::set<State> NFATransitionTable::epsClosure2(const std::set<State> &states) const
+std::set<State> NFATransitionTable::epsClosure(const std::set<State> &states) const
 {
     std::set<State> resultClosure;
 
@@ -286,20 +273,6 @@ std::set<State> NFATransitionTable::getAcceptingStates() const
 }
 
 std::set<char> NFATransitionTable::transitionAlphabet(const std::set<State> &states) const
-{
-    std::set<char> result;
-    for (auto &&transition : m_d->transitions)
-    {
-        for (auto &state : states)
-        {
-            if (std::get<0>(transition) == state && std::get<1>(transition) != EPS)
-                result.insert(std::get<1>(transition));
-        }
-    }
-    return result;
-}
-
-std::set<char> NFATransitionTable::transitionAlphabet2(const std::set<State> &states) const
 {
     std::set<char> result;
 

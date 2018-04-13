@@ -104,15 +104,15 @@ std::vector<std::pair<State, std::map<char, State> > > getAcceptedStates(
     const DFATransitionTable &dfa, std::vector<State> v)
 {
     std::vector<std::pair<State, std::map<char, State> > > res;
-    unsigned long long int len = v.size();
-    for (int i = 0; i < len; i++)
-    {
-        if (v[i].getType() == ACCEPTING)
-        {
-            std::map<char, State> t;
-            res.emplace_back(v[i], t);
-        }
-    }
+    //unsigned long long int len = v.size();
+    //for (int i = 0; i < len; i++)
+    //{
+    //    if (v[i].getType() == ACCEPTING)
+    //    {
+    //        std::map<char, State> t;
+    //        res.emplace_back(v[i], t);
+    //    }
+    //}
     return res;
 }
 
@@ -121,14 +121,14 @@ std::vector<std::pair<State, std::map<char, State> > > getNotAcceptedStates(
 {
     std::vector<std::pair<State, std::map<char, State> > > res;
     unsigned long long int len = v.size();
-    for (int i = 0; i < len; i++)
-    {
-        if (v[i].getType() != ACCEPTING)
-        {
-            std::map<char, State> t;
-            res.emplace_back(v[i], t);
-        }
-    }
+    //for (int i = 0; i < len; i++)
+    //{
+    //    if (v[i].getType() != ACCEPTING)
+    //    {
+    //        std::map<char, State> t;
+    //        res.emplace_back(v[i], t);
+    //    }
+    //}
     return res;
 }
 

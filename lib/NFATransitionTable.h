@@ -10,6 +10,9 @@
 #include <tuple>
 
 #include "State.h"
+
+// Epsilon symbol need to be defined
+// (device control 1) This is a control character that is not likely to exist in a file
 enum
 {
     EPS = '\17'
@@ -18,12 +21,8 @@ enum
 class NFATransitionTable
 {
 public:
-    // This is better be implemented as std::optiona (C++17) or Boost::optional
+    // This is better be implemented as std::optional (C++17) or Boost::optional
     typedef char Input;
-
-    // Epsilon symbol need to be defined
-    // (device control 1) This is a control character that is not likely to exist in a file
-
     typedef std::tuple<State, Input, State> Transition;
 
     NFATransitionTable();
@@ -39,8 +38,6 @@ public:
 
     std::set<State> epsClosure(const State &state) const;
     std::set<State> epsClosure(const std::set<State> &states) const;
-    std::set<State> epsClosure2(const State &state) const;
-    std::set<State> epsClosure2(const std::set<State> &states) const;
     std::set<State> move(const std::set<State> &states, char input) const;
 
     void setStartingStates(const std::set<State> &states);
@@ -55,14 +52,14 @@ public:
     std::set<State> getAcceptingStates() const;
 
     std::set<char> transitionAlphabet(const std::set<State> &) const;
-    std::set<char> transitionAlphabet2(const std::set<State> &) const;
     bool isAcceptingSet(const std::set<State> &states) const;
 
-    static NFATransitionTable mergeNFAs(const std::vector<NFATransitionTable>& nfas);
     NFATransitionTable opUnion(const NFATransitionTable &rhs) const;
     NFATransitionTable opConcat(const NFATransitionTable &rhs) const;
     NFATransitionTable opPlus() const;
     NFATransitionTable opStar() const;
+
+    static NFATransitionTable mergeNFAs(const std::vector<NFATransitionTable>& nfas);
 
 private:
     struct impl;

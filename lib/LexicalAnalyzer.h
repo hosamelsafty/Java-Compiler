@@ -1,28 +1,26 @@
 #ifndef LexicalAnalyzer_H
 #define LexicalAnalyzer_H
 
-#include "DFATransitionTable.h"
-#include "Token.h"
-#include "StreamWrapper.h"
-
+#include <memory>
 #include <iostream>
+
+#include "Token.h"
 
 class ErrorLog;
 class SymbolTable;
+class DFATransitionTable;
 
 class LexicalAnalyzer
 {
 public:
-    LexicalAnalyzer(DFATransitionTable &transitionTable, std::istream& in, ErrorLog *errorLog = nullptr, SymbolTable *symbolTable = nullptr);
+    LexicalAnalyzer(const DFATransitionTable &dfa, std::istream& in, ErrorLog *errorLog = nullptr, SymbolTable *symbolTable = nullptr);
     ~LexicalAnalyzer();
 
     Token* nextToken();
 
 private:
-    DFATransitionTable& dfa_t;
-    StreamWrapper _streamWrapper;
-    ErrorLog * errorLog;
-    SymbolTable * symbolTable;
+    struct impl;
+    std::unique_ptr<impl> m_d;
 };
 
 #endif // LexicalAnalyzer_H
