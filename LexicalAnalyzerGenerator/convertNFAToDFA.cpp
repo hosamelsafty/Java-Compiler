@@ -10,10 +10,10 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
     DFATransitionTable dfa;
 
     // map between NFA set of states and DFA State
-    map<set<State>, StateId> Dstates;
-    std::vector<set<State>> toBeProcessed;
+    map<set<StateId>, StateId> Dstates;
+    std::vector<set<StateId>> toBeProcessed;
 
-    set<State> startClosure = nfa.epsClosure(nfa.getStartingStates());
+    set<StateId> startClosure = nfa.epsClosure(nfa.getStartingStates());
     State s;
     dfa.storeState(s);
     Dstates[startClosure] = s.getID();
@@ -21,18 +21,18 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
 
     dfa.setStartingState(Dstates[startClosure]);
 
-    const set<State> nfaAcceptingStates = nfa.getAcceptingStates();
+    const set<StateId> nfaAcceptingStates = nfa.getAcceptingStates();
 
     while (toBeProcessed.size())
     {
-        set<State> workingSet = *toBeProcessed.begin();
+        set<StateId> workingSet = *toBeProcessed.begin();
         StateId fromState = Dstates[workingSet];
 
         set<char> alphabet = nfa.transitionAlphabet(workingSet);
 
         for (char input : alphabet)
         {
-            set<State> states = nfa.epsClosure(nfa.move(workingSet, input));
+            set<StateId> states = nfa.epsClosure(nfa.move(workingSet, input));
             auto dStateIt = Dstates.find(states);
             if (dStateIt == Dstates.end())
             {
@@ -40,7 +40,7 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
                 dfa.storeState(s);
                 Dstates[states] = s.getID();
 
-                vector<State> acceptingStates;
+                vector<StateId> acceptingStates;
                 set_intersection(nfaAcceptingStates.begin(), nfaAcceptingStates.end(), states.begin(), states.end(),
                     std::inserter(acceptingStates, acceptingStates.begin()));
 
@@ -48,11 +48,12 @@ DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
                 {
                     // Take the one with the highest priority
                     auto chosenAcceptingState = std::max_element(acceptingStates.begin(), acceptingStates.end(),
-                        [](const State &rhs, const State &lhs) {
-                            return rhs.getPriority() < lhs.getPriority();
+                        [&](StateId rhs, StateId lhs) {
+                            return nfa.getState(rhs).getPriority() < nfa.getState(lhs).getPriority();
                     });
 
-                    State acceptingState = *chosenAcceptingState;
+                    StateId acceptingStateId = *chosenAcceptingState;
+                    State acceptingState = nfa.getState(acceptingStateId);
                     assert(acceptingState.getTokenType().size());
 
                     s.setTokenType(acceptingState.getTokenType());

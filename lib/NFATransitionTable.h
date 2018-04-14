@@ -31,28 +31,27 @@ public:
 
     const NFATransitionTable &operator=(const NFATransitionTable &nfa);
 
-    void setTransition(const State &fromState, Input input, const State &toState);
-    void setTransition(const Transition &transition);
+    void storeState(const State &s);
+    State getState(StateId stateId) const;
+    std::set<StateId> getStateIds() const;
 
-    std::vector<Transition> getAllTransitions() const;
+    void setTransition(StateId fromState, Input input, StateId toState);
 
-    std::set<State> epsClosure(const State &state) const;
-    std::set<State> epsClosure(const std::set<State> &states) const;
-    std::set<State> move(const std::set<State> &states, char input) const;
+    std::set<StateId> epsClosure(StateId stateId) const;
+    std::set<StateId> epsClosure(const std::set<StateId> &stateIds) const;
+    std::set<StateId> move(const std::set<StateId> &stateIds, Input input) const;
 
-    void setStartingStates(const std::set<State> &states);
-    void addStartingState(const State &state);
-    void removeStartingState(const State &state);
+    void setStartingStates(const std::set<StateId> &stateIds);
+    void addStartingState(StateId stateId);
 
-    void setAcceptingStates(const std::set<State> &states);
-    void addAcceptingStates(const State &state);
-    void removeAcceptingStates(const State &state);
+    void setAcceptingStates(const std::set<StateId> &stateIds);
+    void addAcceptingStates(StateId stateId);
 
-    std::set<State> getStartingStates() const;
-    std::set<State> getAcceptingStates() const;
+    std::set<StateId> getStartingStates() const;
+    std::set<StateId> getAcceptingStates() const;
 
-    std::set<char> transitionAlphabet(const std::set<State> &) const;
-    bool isAcceptingSet(const std::set<State> &states) const;
+    std::set<Input> transitionAlphabet(const std::set<StateId> &stateIds) const;
+    bool isAcceptingSet(const std::set<StateId> &stateIds) const;
 
     NFATransitionTable opUnion(const NFATransitionTable &rhs) const;
     NFATransitionTable opConcat(const NFATransitionTable &rhs) const;
@@ -64,6 +63,7 @@ public:
 private:
     struct impl;
     std::unique_ptr<impl> m_d;
+    friend void copyAllTransitions(NFATransitionTable &target, const NFATransitionTable &source);
 };
 
 #endif // NFATransitionTable_H

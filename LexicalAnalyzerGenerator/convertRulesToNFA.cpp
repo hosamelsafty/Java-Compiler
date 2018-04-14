@@ -29,16 +29,14 @@ NFATransitionTable nfaOfRule(const Rule &rule, int priority)
 {
     NFATransitionTable nfa = nfaOfRegex(rule.regex);
 
-    std::set<State> states = nfa.getAcceptingStates();
-    std::set<State> acceptingStates;
-    for (auto &state : states)
+    std::set<StateId> states = nfa.getAcceptingStates();
+    for (auto &stateId : states)
     {
-        State acceptingState(state);
+        State acceptingState(stateId);
         acceptingState.setTokenType(rule.type);
         acceptingState.setPriority(priority);
-        acceptingStates.insert(acceptingState);
+        nfa.storeState(acceptingState);
     }
-    nfa.setAcceptingStates(acceptingStates);
 
     return nfa;
 }
@@ -169,9 +167,11 @@ NFATransitionTable charNFA(char c)
 {
     NFATransitionTable nfa;
     State s, f;
-    nfa.setTransition(s, c, f);
-    nfa.addStartingState(s);
-    nfa.addAcceptingStates(f);
+    nfa.storeState(s);
+    nfa.storeState(f);
+    nfa.setTransition(s.getID(), c, f.getID());
+    nfa.addStartingState(s.getID());
+    nfa.addAcceptingStates(f.getID());
     return nfa;
 }
 

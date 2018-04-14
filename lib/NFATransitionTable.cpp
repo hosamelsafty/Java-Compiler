@@ -5,15 +5,15 @@
 
 struct NFATransitionTable::impl
 {
-    std::vector< Transition > transitions;
-    std::map< State, std::set<int> > fromIndex;
-    std::map< State, std::set<int> > toIndex;
+    std::map < StateId, std::map<Input, std::set<StateId> > > table;
+    std::map<StateId, State> states;
 
-    std::set<State> startingStates;
-    std::set<State> endingStates;
+    std::set<StateId> startingStates;
+    std::set<StateId> endingStates;
 
-    std::set<State> directClosure(const State &state, char input) const;
-    bool hasConcreteTransition(const State &state) const;
+    std::set<StateId> directClosure(StateId stateId, Input input) const;
+    bool hasConcreteTransition(StateId stateId) const;
+
 };
 
 
@@ -26,9 +26,8 @@ NFATransitionTable::NFATransitionTable()
 NFATransitionTable::NFATransitionTable(const NFATransitionTable & nfa)
     : m_d(std::make_unique<impl>())
 {
-    m_d->transitions = nfa.m_d->transitions;
-    m_d->fromIndex = nfa.m_d->fromIndex;
-    m_d->toIndex = nfa.m_d->toIndex;
+    m_d->table = nfa.m_d->table;
+    m_d->states = nfa.m_d->states;
     m_d->startingStates = nfa.m_d->startingStates;
     m_d->endingStates = nfa.m_d->endingStates;
 }
@@ -40,78 +39,88 @@ NFATransitionTable::~NFATransitionTable()
 
 const NFATransitionTable & NFATransitionTable::operator=(const NFATransitionTable &nfa)
 {
-    m_d->transitions = nfa.m_d->transitions;
-    m_d->fromIndex = nfa.m_d->fromIndex;
-    m_d->toIndex = nfa.m_d->toIndex;
+    m_d->table = nfa.m_d->table;
+    m_d->states = nfa.m_d->states;
     m_d->startingStates = nfa.m_d->startingStates;
     m_d->endingStates = nfa.m_d->endingStates;
 
     return *this;
 }
 
-void NFATransitionTable::setTransition(const State &fromState, NFATransitionTable::Input input, const State &toState)
+void NFATransitionTable::storeState(const State &s)
 {
-    std::set<int> fromIndicies = m_d->fromIndex[fromState];
-    std::set<int> toIndicies = m_d->toIndex[toState];
-    std::set<int> possibleCollision;
-    set_intersection(fromIndicies.begin(), fromIndicies.end(), toIndicies.begin(), toIndicies.end(),
-        std::inserter(possibleCollision, possibleCollision.begin()));
-
-    for (int i : possibleCollision)
+    auto it = m_d->states.find(s.getID());
+    if (it == m_d->states.end())
     {
-        if (std::get<1>(m_d->transitions[i]) == input)
-        {
-            // No need to add the same transition again
-            return;
-        }
+        m_d->states.insert(std::pair<StateId, State>(s.getID(), s));
     }
-
-    // That transition is not found. Add it.
-    m_d->transitions.push_back(Transition(fromState, input, toState));
-    int index = m_d->transitions.size() - 1;
-    m_d->fromIndex[fromState].insert(index);
-    m_d->toIndex[toState].insert(index);
+    else
+    {
+        m_d->states[s.getID()] = s;
+    }
 }
 
-void NFATransitionTable::setTransition(const Transition &transition)
+State NFATransitionTable::getState(StateId stateId) const
 {
-    setTransition(std::get<0>(transition), std::get<1>(transition), std::get<2>(transition));
+    auto it = m_d->states.find(stateId);
+    assert(it != m_d->states.end());
+    return it->second;
 }
 
-std::vector<NFATransitionTable::Transition> NFATransitionTable::getAllTransitions() const
+std::set<StateId> NFATransitionTable::getStateIds() const
 {
-    return m_d->transitions;
+    std::set<StateId> stateIds;
+    for (auto & pair : m_d->states)
+    {
+        stateIds.insert(pair.first);
+    }
+    return stateIds;
 }
 
-std::set<State> NFATransitionTable::impl::directClosure(const State &state, char input) const
+void NFATransitionTable::setTransition(StateId fromId, NFATransitionTable::Input input, StateId toId)
 {
-    std::set<State> states;
+    assert(m_d->states.find(fromId) != m_d->states.end());
+    assert(m_d->states.find(toId) != m_d->states.end());
 
-    if (fromIndex.find(state) == fromIndex.end())
+    m_d->table[fromId][input].insert(toId);
+}
+
+std::set<StateId> NFATransitionTable::impl::directClosure(StateId stateId, Input input) const
+{
+    assert(states.find(stateId) != states.end());
+
+    std::set<StateId> states;
+    auto it = table.find(stateId);
+
+    if (it == table.end())
+    {
         return states;
-
-    std::set<int> fromIndicies = fromIndex.at(state);
-
-    for (int i : fromIndicies)
-    {
-        if (std::get<1>(transitions[i]) == input)
-        {
-            states.insert(std::get<2>(transitions[i]));
-        }
     }
-    return states;
+
+    auto inputIt = it->second.find(input);
+
+    if (inputIt == it->second.end())
+    {
+        return states;
+    }
+
+    return inputIt->second;
 }
 
-bool NFATransitionTable::impl::hasConcreteTransition(const State &state) const
+bool NFATransitionTable::impl::hasConcreteTransition(StateId stateId) const
 {
-    if (fromIndex.find(state) == fromIndex.end())
-        return false;
+    assert(states.find(stateId) != states.end());
 
-    std::set<int> fromIndicies = fromIndex.at(state);
+    auto it = table.find(stateId);
 
-    for (int i : fromIndicies)
+    if (it == table.end())
     {
-        if (std::get<1>(transitions[i]) != EPS)
+        return false;
+    }
+
+    for (auto &transitionPair : it->second)
+    {
+        if (transitionPair.first != EPS)
         {
             return true;
         }
@@ -167,27 +176,29 @@ bool NFATransitionTable::impl::hasConcreteTransition(const State &state) const
 //}
 
 
-std::set<State> NFATransitionTable::epsClosure(const State &state) const
+std::set<StateId> NFATransitionTable::epsClosure(StateId stateId) const
 {
-    std::set<State> resultColsure;
-    std::set<State> toBeProcessed;
-    std::set<State> doneProcessing;
+    assert(m_d->states.find(stateId) != m_d->states.end());
 
-    State workingState;
+    std::set<StateId> resultColsure;
+    std::set<StateId> toBeProcessed;
+    std::set<StateId> doneProcessing;
 
-    resultColsure.insert(state);
-    toBeProcessed.insert(state);
+    StateId workingState;
+
+    resultColsure.insert(stateId);
+    toBeProcessed.insert(stateId);
 
     while (!toBeProcessed.empty())
     {
         workingState = *toBeProcessed.begin();
-        std::set<State> directClosure = m_d->directClosure(workingState, EPS);
+        std::set<StateId> directClosure = m_d->directClosure(workingState, EPS);
 
         resultColsure.insert(directClosure.begin(), directClosure.end());
 
         if (!directClosure.empty())
         {
-            std::set<State> newInClosure;
+            std::set<StateId> newInClosure;
 
             std::set_difference(directClosure.begin(), directClosure.end(), doneProcessing.begin(), doneProcessing.end(),
                 std::inserter(newInClosure, newInClosure.begin()));
@@ -205,86 +216,134 @@ std::set<State> NFATransitionTable::epsClosure(const State &state) const
     return resultColsure;
 }
 
-std::set<State> NFATransitionTable::epsClosure(const std::set<State> &states) const
-{
-    std::set<State> resultClosure;
+// OLD Version
+//std::set<StateId> NFATransitionTable::epsClosure(const std::set<StateId> &stateIds) const
+//{
+//    std::set<StateId> resultClosure;
+//
+//    for (auto && stateId : stateIds)
+//    {
+//        // This is not efficient but correct
+//        std::set<StateId> closure = epsClosure(stateId);
+//        resultClosure.insert(closure.begin(), closure.end());
+//    }
+//
+//    return resultClosure;
+//}
 
-    for (auto && state : states)
+// Optimized version
+std::set<StateId> NFATransitionTable::epsClosure(const std::set<StateId> &stateIds) const
+{
+    std::set<StateId> resultColsure;
+    std::set<StateId> toBeProcessed;
+    std::set<StateId> doneProcessing;
+
+    resultColsure.insert(stateIds.begin(), stateIds.end());
+    toBeProcessed.insert(stateIds.begin(), stateIds.end());
+
+    StateId workingState;
+
+    while (!toBeProcessed.empty())
     {
-        // This is not efficient but correct
-        std::set<State> closure = epsClosure(state);
-        resultClosure.insert(closure.begin(), closure.end());
+        workingState = *toBeProcessed.begin();
+        std::set<StateId> directClosure = m_d->directClosure(workingState, EPS);
+
+        resultColsure.insert(directClosure.begin(), directClosure.end());
+
+        if (!directClosure.empty())
+        {
+            std::set<StateId> newInClosure;
+
+            std::set_difference(directClosure.begin(), directClosure.end(), doneProcessing.begin(), doneProcessing.end(),
+                std::inserter(newInClosure, newInClosure.begin()));
+
+            if (!newInClosure.empty())
+            {
+                toBeProcessed.insert(newInClosure.begin(), newInClosure.end());
+            }
+        }
+
+        doneProcessing.insert(workingState);
+        toBeProcessed.erase(workingState);
     }
 
-    return resultClosure;
+    return resultColsure;
 }
 
-std::set<State> NFATransitionTable::move(const std::set<State> &states, char input) const
+std::set<StateId> NFATransitionTable::move(const std::set<StateId> &stateIds, Input input) const
 {
-    std::set<State> directClosureOfinput;
+    std::set<StateId> directClosureOfinput;
 
-    for (auto && state : states)
+    for (auto && stateId : stateIds)
     {
-        std::set<State> closure = m_d->directClosure(state, input);
+        std::set<StateId> closure = m_d->directClosure(stateId, input);
         directClosureOfinput.insert(closure.begin(), closure.end());
     }
 
     return directClosureOfinput;
-
 }
 
-void NFATransitionTable::setStartingStates(const std::set<State> &states)
+void NFATransitionTable::setStartingStates(const std::set<StateId> &stateIds)
 {
-    m_d->startingStates = states;
+    for (auto &stateId : stateIds)
+    {
+        assert(m_d->states.find(stateId) != m_d->states.end());
+    }
+
+    m_d->startingStates = stateIds;
 }
 
-void NFATransitionTable::addStartingState(const State &state)
+void NFATransitionTable::addStartingState(StateId stateId)
 {
-    m_d->startingStates.insert(state);
+    assert(m_d->states.find(stateId) != m_d->states.end());
+
+    m_d->startingStates.insert(stateId);
 }
 
-void NFATransitionTable::removeStartingState(const State &state)
+
+void NFATransitionTable::setAcceptingStates(const std::set<StateId> &stateIds)
 {
-    m_d->startingStates.erase(state);
+    for (auto &stateId : stateIds)
+    {
+        assert(m_d->states.find(stateId) != m_d->states.end());
+    }
+
+    m_d->endingStates = stateIds;
 }
 
-void NFATransitionTable::setAcceptingStates(const std::set<State> &states)
+void NFATransitionTable::addAcceptingStates(StateId stateId)
 {
-    m_d->endingStates = states;
+    assert(m_d->states.find(stateId) != m_d->states.end());
+
+    m_d->endingStates.insert(stateId);
 }
 
-void NFATransitionTable::addAcceptingStates(const State &state)
-{
-    m_d->endingStates.insert(state);
-}
 
-void NFATransitionTable::removeAcceptingStates(const State &state)
-{
-    m_d->endingStates.erase(state);
-}
-
-std::set<State> NFATransitionTable::getStartingStates() const
+std::set<StateId> NFATransitionTable::getStartingStates() const
 {
     return m_d->startingStates;
 }
 
-std::set<State> NFATransitionTable::getAcceptingStates() const
+std::set<StateId> NFATransitionTable::getAcceptingStates() const
 {
     return m_d->endingStates;
 }
 
-std::set<char> NFATransitionTable::transitionAlphabet(const std::set<State> &states) const
+std::set<NFATransitionTable::Input> NFATransitionTable::transitionAlphabet(const std::set<StateId> &stateIds) const
 {
-    std::set<char> result;
+    std::set<Input> result;
 
-    for (auto &state : states)
+    for (auto &stateId : stateIds)
     {
-        std::set<int> fromIndeces = m_d->fromIndex[state];
-        for (int i : fromIndeces)
+        auto it = m_d->table.find(stateId);
+        if (it != m_d->table.end())
         {
-            if (std::get<1>(m_d->transitions[i]) != EPS)
+            for (auto & transitionPair : it->second)
             {
-                result.insert(std::get<1>(m_d->transitions[i]));
+                if (transitionPair.first != EPS)
+                {
+                    result.insert(transitionPair.first);
+                }
             }
         }
     }
@@ -292,11 +351,11 @@ std::set<char> NFATransitionTable::transitionAlphabet(const std::set<State> &sta
     return result;
 }
 
-bool NFATransitionTable::isAcceptingSet(const std::set<State> &states) const
+bool NFATransitionTable::isAcceptingSet(const std::set<StateId> &stateIds) const
 {
-    for (auto& state : states)
+    for (auto& stateId : stateIds)
     {
-        if (m_d->endingStates.find(state) != m_d->endingStates.end())
+        if (m_d->endingStates.find(stateId) != m_d->endingStates.end())
         {
             return true;
         }
@@ -305,91 +364,68 @@ bool NFATransitionTable::isAcceptingSet(const std::set<State> &states) const
 }
 
 
-NFATransitionTable NFATransitionTable::mergeNFAs(const std::vector<NFATransitionTable>& nfas)
+void copyAllTransitions(NFATransitionTable &target, const NFATransitionTable &source)
 {
-    NFATransitionTable result;
-    // Depending on the uniqueness of State we will add the states from *this and rhs to result.
-    //  Add all transition of nfas to result
-    for (NFATransitionTable nfa : nfas)
+    for (auto stateId : source.getStateIds())
     {
-        for (auto && transition : nfa.m_d->transitions)
-        {
-            result.setTransition(transition);
-        }
+        target.storeState(source.getState(stateId));
     }
 
-    //  Create resultStartingState
-    State startState(State::newID());
-    result.setStartingStates(std::set<State>{startState});
-
-
-    //  Add to result: transitions from resultStartingState to all startingStates of nfas
-    for (NFATransitionTable nfa : nfas)
+    for (auto && fromPair : source.m_d->table)
     {
-        for (auto &state : nfa.m_d->startingStates)
+        for (auto && inputPair : fromPair.second)
         {
-            result.setTransition(startState, EPS, state);
+            for (auto && toId : inputPair.second)
+            {
+                target.setTransition(fromPair.first, inputPair.first, toId);
+            }
         }
     }
-
-    //  Add to result: ending states of nfas to result ending states
-    for (NFATransitionTable nfa : nfas)
-    {
-        for (auto &state : nfa.m_d->endingStates)
-        {
-            result.addAcceptingStates(state);
-        }
-    }
-
-    return result;
 }
 
 NFATransitionTable NFATransitionTable::opUnion(const NFATransitionTable &rhs) const
 {
     NFATransitionTable result;
+
     // Depending on the uniqueness of State we will add the states from *this and rhs to result.
     //  Add all transition of *this to result
-    for (auto && transition : m_d->transitions)
-    {
-        result.setTransition(transition);
-    }
+    copyAllTransitions(result, *this);
 
     //  Add all transition of rhs to result
-    for (auto && transition : rhs.m_d->transitions)
-    {
-        result.setTransition(transition);
-    }
+    copyAllTransitions(result,rhs);
 
-    //  Create resultStartingState
-    State startState(State::newID());
-    result.setStartingStates(std::set<State>{startState});
+    //  Create resultStartingState 
+    State startState;
+    result.storeState(startState);
+    result.addStartingState(startState.getID());
 
     //  Add to result: transitions from resultStartingState to all startingStates of *this
-    for (auto& state : m_d->startingStates)
+    for (auto& stateId : m_d->startingStates)
     {
-        result.setTransition(startState, EPS, state);
+        result.setTransition(startState.getID(), EPS, stateId);
     }
 
     //  Add to result: transitions from resultStartingState to all startingStates of rhs
-    for (auto& state : rhs.m_d->startingStates)
+    for (auto& stateId : rhs.m_d->startingStates)
     {
-        result.setTransition(startState, EPS, state);
+        result.setTransition(startState.getID(), EPS, stateId);
     }
 
     //  Create resultEndingState
-    State endState(State::newID());
-    result.setAcceptingStates(std::set<State>{endState});
+    State endState;
+    result.storeState(endState);
+    result.addAcceptingStates(endState.getID());
 
     //  Add to result: transitions from all endingStates of *this to resultEndingState.
-    for (auto& state : m_d->endingStates)
+    for (auto& stateId : m_d->endingStates)
     {
-        result.setTransition(state, EPS, endState);
+        result.setTransition(stateId, EPS, endState.getID());
     }
 
     //  Add to result: transitions from all endingStates of rhs to resultEndingState.
-    for (auto& state : rhs.m_d->endingStates)
+    for (auto& stateId : rhs.m_d->endingStates)
     {
-        result.setTransition(state, EPS, endState);
+        result.setTransition(stateId, EPS, endState.getID());
     }
 
     return result;
@@ -398,51 +434,40 @@ NFATransitionTable NFATransitionTable::opUnion(const NFATransitionTable &rhs) co
 NFATransitionTable NFATransitionTable::opConcat(const NFATransitionTable &rhs) const
 {
     // *this must have one endingState and rhs must have one starting state.
-    assert(this->getAcceptingStates().size() == 1);
-    assert(rhs.getStartingStates().size() == 1);
+    assert(m_d->endingStates.size() == 1);
+    assert(rhs.m_d->startingStates.size() == 1);
 
     NFATransitionTable result;
 
     // Depending on the uniqueness of State we will add the states from *this and rhs to result.
 
     //  Add all transition of *this to result
-    for (auto && transition : m_d->transitions)
-    {
-        result.setTransition(transition);
-    }
+    copyAllTransitions(result, *this);
 
     //  Add all transition of rhs to result.
-    // Special case for transitions starting at the startingState of rhs.
+    copyAllTransitions(result, rhs);
+
+    // TODO Possible Optimization: Special case for transitions starting at the startingState of rhs.
     // The from part of these transitions will be replaced by the endingState *this when being added to result.
-    State endingStateThis = *m_d->endingStates.begin();
-    State startingStateRHS = *rhs.m_d->startingStates.begin();
-    for (auto && transition : rhs.m_d->transitions)
-    {
-        result.setTransition(transition);
-        /*if (std::get<0>(transition) == startingStateRHS)
-        {
-            result.setTransition(Transition(endingStateThis, std::get<1>(transition), std::get<2>(transition)));
-        }
-        else
-        {
-            result.setTransition(transition);
-        }*/
-    }
+
+    // Concat
+    StateId endingStateThis = *m_d->endingStates.begin();
+    StateId startingStateRHS = *rhs.m_d->startingStates.begin();
     result.setTransition(endingStateThis, EPS, startingStateRHS);
 
-    //  Set startingState of result to be the starting state of *this.
+    // Set startingState of result to be the starting state of *this.
     result.setStartingStates(m_d->startingStates);
 
-
-    //  Set endingState of result to be the ending state of rhs.
+    // Set endingState of result to be the ending state of rhs.
     result.setAcceptingStates(rhs.m_d->endingStates);
+
     return result;
 }
 
 NFATransitionTable NFATransitionTable::opPlus() const
 {
     // *this must have one endingState and rhs must have one starting state.
-    NFATransitionTable result = (*this).opConcat((*this).opStar());
+    NFATransitionTable result = opConcat(opStar());
 
     return result;
 }
@@ -454,41 +479,80 @@ NFATransitionTable NFATransitionTable::opStar() const
     assert(m_d->endingStates.size() == 1);
 
     NFATransitionTable result;
-    State startingState(State::newID());
-    State endingState(State::newID());
+    State startingState;
+    State endingState;
+    result.storeState(startingState);
+    result.storeState(endingState);
+    result.addStartingState(startingState.getID());
+    result.addAcceptingStates(endingState.getID());
 
-    State startingStateThis = *m_d->startingStates.begin();
-    State endingStateThis = *m_d->endingStates.begin();
+    StateId oldStartingState = *m_d->startingStates.begin();
+    StateId oldEndingState = *m_d->endingStates.begin();
 
     //  Add all transition of *this to result
-    for (auto && transition : m_d->transitions)
-    {
-        result.setTransition(transition);
-    }
+    copyAllTransitions(result, *this);
 
     result.setTransition(
-        endingStateThis,
+        oldEndingState,
         EPS,
-        startingStateThis);
+        oldStartingState);
 
 
     result.setTransition(
-        startingState,
+        startingState.getID(),
         EPS,
-        startingStateThis);
+        oldStartingState);
 
     result.setTransition(
-        endingStateThis,
+        oldEndingState,
         EPS,
-        endingState);
+        endingState.getID());
 
     result.setTransition(
-        startingState,
+        startingState.getID(),
         EPS,
-        endingState);
-
-    result.addStartingState(startingState);
-    result.addAcceptingStates(endingState);
+        endingState.getID());
 
     return result;
 }
+
+
+NFATransitionTable NFATransitionTable::mergeNFAs(const std::vector<NFATransitionTable>& nfas)
+{
+    NFATransitionTable result;
+    
+    // Depending on the uniqueness of State we will add the states from *this and rhs to result.
+
+    //  Add all transition of nfas to result
+    for (NFATransitionTable nfa : nfas)
+    {
+        copyAllTransitions(result, nfa);
+    }
+
+    //  Create resultStartingState
+    State startState;
+    result.storeState(startState);
+    result.addStartingState(startState.getID());
+
+
+    //  Add to result: transitions from resultStartingState to all startingStates of nfas
+    for (NFATransitionTable nfa : nfas)
+    {
+        for (auto &stateId : nfa.m_d->startingStates)
+        {
+            result.setTransition(startState.getID(), EPS, stateId);
+        }
+    }
+
+    //  Add to result: ending states of nfas to result ending states
+    for (NFATransitionTable nfa : nfas)
+    {
+        for (auto &stateId : nfa.m_d->endingStates)
+        {
+            result.addAcceptingStates(stateId);
+        }
+    }
+
+    return result;
+}
+
