@@ -121,6 +121,7 @@ bool NFATransitionTable::impl::hasConcreteTransition(const State &state) const
 }
 
 // OLDER VERSION
+// This seems to be an optimization suggested by Youssef. But not sure about its effect.
 //std::set<State> NFATransitionTable::epsClosure(const State &state) const
 //{
 //    std::set<State> resultColsure;
@@ -347,7 +348,7 @@ NFATransitionTable NFATransitionTable::opUnion(const NFATransitionTable &rhs) co
 {
     NFATransitionTable result;
     // Depending on the uniqueness of State we will add the states from *this and rhs to result.
-   //  Add all transition of *this to result
+    //  Add all transition of *this to result
     for (auto && transition : m_d->transitions)
     {
         result.setTransition(transition);

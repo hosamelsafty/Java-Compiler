@@ -1,237 +1,103 @@
 #include "minimizeDFA.h"
+#include "lib/GroupKeeper.h"
 
-std::vector<std::pair<State, std::map<char, State> > > getAcceptedStates(
-    const DFATransitionTable &dfa, std::vector<State> v);
+#include <assert.h>
 
-std::vector<std::pair<State, std::map<char, State> > > getNotAcceptedStates(
-    const DFATransitionTable &dfa, std::vector<State> v);
+bool match(StateId s1, StateId s2, const GroupKeeper &keeper, const DFATransitionTable &dfa);
 
-void
-matchStates(const DFATransitionTable &dfa,
-    std::vector<
-    std::vector<
-    std::pair<State, std::map<char, State> > > > &classes);
-
-int
-findClass(
-    std::vector<
-    std::vector<
-    std::pair<State, std::map<char, State> > > > &classes,
-    unsigned long long int end, int id);
-
-std::vector<
-    std::vector<std::pair<State, std::map<char, State> > > >
-    split(
-        std::vector<
-        std::vector<
-        std::pair<State, std::map<char, State> > > > &classes,
-        unsigned long long int end,
-        std::vector<std::pair<State, std::map<char, State> > > group);
-
-bool is_equal(
-    std::vector<
-    std::vector<
-    std::pair<State, std::map<char, State> > > > classes,
-    unsigned long long int end, std::map<char, State> m1,
-    std::map<char, State> m2);
-
-#pragma clang diagnostic push
-
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 DFATransitionTable minimizeDFA(const DFATransitionTable &dfa)
 {
-    //std::vector<State> states = dfa.getStates();
-    //std::vector<
-    //    std::vector<std::pair<State, std::map<char, State> > > > classes;
-    //classes.push_back(getNotAcceptedStates(dfa, states));
-    //classes.push_back(getAcceptedStates(dfa, states));
-    //bool finish = false;
-    //unsigned long long int end = 2;
-    //while (!finish)
-    //{
-    //    finish = true;
-    //    matchStates(dfa, classes);
-    //    for (int i = 0; i < end; i++)
-    //    {
-    //        std::vector<
-    //            std::vector<
-    //            std::pair<State,
-    //            std::map<char, State> > > > groups =
-    //            split(classes, end, classes[i]);
-    //        unsigned long long int len = groups.size();
-    //        for (int j = 0; j < len; j++)
-    //        {
-    //            classes.push_back(groups[j]);
-    //        }
-    //    }
-    //    if (classes.size() != 2 * end)
-    //    {
-    //        finish = false;
-    //    }
-    //    for (int i = 0; i < end; i++)
-    //    {
-    //        classes.erase(classes.begin());
-    //    }
-    //    end = classes.size();
-    //}
-    //matchStates(dfa, classes);
-    DFATransitionTable min_dfa;
-    //unsigned long long int no_states = classes.size();
-    //std::vector<State> _states(no_states); // [no_states];
-    //for (int i = 0; i < no_states; i++)
-    //{
-    //    _states[i] = State(i);
-    //    _states[i].setType(classes[i][0].first.getType());
-    //}
-    //for (int i = 0; i < no_states; i++)
-    //{
-    //    std::map<char, State> trans = dfa.getMapping(
-    //        classes[i][0].first);
-    //    for (auto &pair : trans)
-    //    {
-    //        int class_id = findClass(classes, end,
-    //            trans[pair.first].getID());
-    //        min_dfa.add(_states[i], pair.first,
-    //            _states[class_id]);
-    //    }
-    //}
-    return min_dfa;
-}
+    GroupKeeper keeper;
+    
+    auto allIt = keeper.addGroup(dfa.getStateIds());
+    keeper.partition(allIt, dfa.getAcceptingStateIds());
 
-#pragma clang diagnostic pop
-
-std::vector<std::pair<State, std::map<char, State> > > getAcceptedStates(
-    const DFATransitionTable &dfa, std::vector<State> v)
-{
-    std::vector<std::pair<State, std::map<char, State> > > res;
-    //unsigned long long int len = v.size();
-    //for (int i = 0; i < len; i++)
-    //{
-    //    if (v[i].getType() == ACCEPTING)
-    //    {
-    //        std::map<char, State> t;
-    //        res.emplace_back(v[i], t);
-    //    }
-    //}
-    return res;
-}
-
-std::vector<std::pair<State, std::map<char, State> > > getNotAcceptedStates(
-    const DFATransitionTable &dfa, std::vector<State> v)
-{
-    std::vector<std::pair<State, std::map<char, State> > > res;
-    unsigned long long int len = v.size();
-    //for (int i = 0; i < len; i++)
-    //{
-    //    if (v[i].getType() != ACCEPTING)
-    //    {
-    //        std::map<char, State> t;
-    //        res.emplace_back(v[i], t);
-    //    }
-    //}
-    return res;
-}
-
-void matchStates(const DFATransitionTable &dfa,
-    std::vector<
-    std::vector<
-    std::pair<State, std::map<char, State> > > > &classes)
-{
-    //unsigned long long int end = classes.size();
-    //for (int i = 0; i < end; i++)
-    //{
-    //    unsigned long long int n = classes[i].size();
-    //    for (int j = 0; j < n; j++)
-    //    {
-    //        std::map<char, State> trans = dfa.getMapping(
-    //            classes[i][j].first);
-    //        for (auto &pair : trans)
-    //        {
-    //            classes[i][j].second[pair.first] = findClass(
-    //                classes, end, pair.second.getID());
-    //        }
-    //    }
-    //}
-}
-
-int findClass(
-    std::vector<
-    std::vector<
-    std::pair<State, std::map<char, State> > > > &classes,
-    unsigned long long int end, int id)
-{
-    for (int i = 0; i < end; i++)
+    GroupKeeper::iterator it = keeper.end();
+    while ((it = keeper.getUnmarkedGroupOfmultiState()) != keeper.end())
     {
-        for (int j = 0; j < classes[i].size(); j++)
+        Group g = *it;
+        StateId representative = *g.begin();
+        Group partition;
+        partition.insert(representative);
+        for (auto state : g)
         {
-            if (classes[i][j].first.getID() == id)
+            if (state != representative && match(representative, state, keeper, dfa))
             {
-                return i;
+                partition.insert(state);
             }
         }
-    }
-}
 
-std::vector<
-    std::vector<std::pair<State, std::map<char, State> > > > split(
-        std::vector<
-        std::vector<
-        std::pair<State, std::map<char, State> > > > &classes,
-        unsigned long long int end,
-        std::vector<std::pair<State, std::map<char, State> > > group)
-{
-    unsigned long long int n = group.size();
-    std::vector<bool> vis(n, false);
-    std::vector<
-        std::vector<std::pair<State, std::map<char, State> > > > res;
-    for (int j = 0; j < n; j++)
+        if (partition == g)
+        {
+            keeper.mark(it);
+        }
+        else
+        {
+            keeper.partition(it, partition);
+        }
+    }
+
+    DFATransitionTable newDFA;
+    std::map<StateId, StateId> representativeMapping;
+    for (auto &group : keeper)
     {
-        if (vis[j])
+        StateId representativeId = *group.begin();
+        newDFA.storeState(dfa.getState(representativeId));
+        for (auto &&stateId : group)
         {
-            continue;
+            representativeMapping[stateId] = representativeId;
         }
-        vis[j] = true;
-        std::vector<std::pair<State, std::map<char, State> > > temp;
-        std::map<char, State> v;
-        temp.emplace_back(group[j].first, v);
-        for (int k = j + 1; k < n; k++)
-        {
-            if (is_equal(classes, end, group[j].second,
-                group[k].second))
-            {
-                vis[k] = true;
-                std::map<char, State> vt;
-                temp.emplace_back(group[k].first, vt);
-            }
-        }
-        res.push_back(temp);
     }
-    return res;
+
+    for(StateId representativeId : newDFA.getStateIds())
+    {
+        auto transitions = dfa.getTransitions(representativeId);
+
+        for (auto &transitionPair : transitions)
+        {
+            newDFA.setTransition(representativeId, transitionPair.first, representativeMapping[transitionPair.second]);
+        }
+
+        if (dfa.isAcceptingState(representativeId))
+        {
+            newDFA.addAcceptingState(representativeId);
+        }
+    }
+
+    newDFA.setStartingState(dfa.getStartingState());
+
+    return newDFA;
 }
 
-bool is_equal(
-    std::vector<
-    std::vector<
-    std::pair<State, std::map<char, State> > > > classes,
-    unsigned long long int end, std::map<char, State> m1,
-    std::map<char, State> m2)
+
+
+bool match(StateId s1, StateId s2, const GroupKeeper &keeper, const DFATransitionTable &dfa)
 {
-    if (m1.size() != m2.size())
+    auto s1Transitions = dfa.getTransitions(s1);
+    auto s2Transitions = dfa.getTransitions(s2);
+
+    // 1. s1Transitions only have the transitions to real States
+    // if sizes does not match, This means that there is an input for s1
+    // that goes to the empty state while s2 goes to a real state. Or vice versa.
+    // 2. The other condition is simply to have different accepting states for
+    // different tokens instead of merging them.
+    if (s1Transitions.size() != s2Transitions.size() || dfa.getState(s1).getTokenType() != dfa.getState(s2).getTokenType())
     {
         return false;
     }
-    for (auto &pair : m1)
+
+    for (auto &transition : s1Transitions)
     {
-        if (!m2.count(pair.first))
+        auto s2Transition = s2Transitions.find(transition.first);
+
+        if (s2Transition != s2Transitions.end())
         {
-            return false;
-        }
-        if (findClass(classes, end, m1[pair.first].getID())
-            != findClass(classes, end,
-                m2[pair.first].getID()))
-        {
-            return false;
+            if (keeper.group(transition.second) != keeper.group(s2Transition->second))
+            {
+                return false;
+            }
         }
     }
+
     return true;
 }

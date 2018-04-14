@@ -59,6 +59,15 @@ std::map<StateId, State> DFATransitionTable::getStates() const
     return m_d->states;
 }
 
+std::set<StateId> DFATransitionTable::getStateIds() const
+{
+    std::set<StateId> stateIds;
+    for (auto & pair : m_d->states)
+    {
+        stateIds.insert(pair.first);
+    }
+    return stateIds;
+}
 
 void DFATransitionTable::setTransition(StateId fromId, char input, StateId toId)
 {
@@ -138,6 +147,13 @@ std::set<StateId> DFATransitionTable::getAcceptingStateIds() const
 bool DFATransitionTable::isAcceptingState(StateId stateId) const
 {
     return m_d->endingStateIds.find(stateId) != m_d->endingStateIds.end();
+}
+
+
+std::map<char, StateId> DFATransitionTable::getTransitions(StateId stateId) const
+{
+    assert(m_d->states.find(stateId) != m_d->states.end());
+    return m_d->table[stateId];
 }
 
 

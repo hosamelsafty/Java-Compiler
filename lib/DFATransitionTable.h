@@ -20,6 +20,7 @@ public:
     void storeState(const State &s);
     State getState(StateId stateId) const;
     std::map<StateId, State> getStates() const;
+    std::set<StateId> getStateIds() const;
     
     void setTransition(StateId fromId, char input, StateId toId);
 
@@ -34,6 +35,8 @@ public:
     std::set<StateId> getAcceptingStateIds() const;
 
     bool isAcceptingState(StateId stateId) const;
+
+    std::map<char, StateId> getTransitions(StateId stateId) const;
 
 private:
     struct impl;
