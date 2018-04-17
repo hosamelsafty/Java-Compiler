@@ -17,10 +17,10 @@ struct NFATransitionTable::impl
 
 
 NFATransitionTable::NFATransitionTable()
-	: m_d(std::make_unique<impl>())
 {
 
 }
+
 
 NFATransitionTable::NFATransitionTable(const NFATransitionTable & nfa)
 	: m_d(std::make_unique<impl>())

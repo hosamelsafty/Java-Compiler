@@ -27,6 +27,13 @@ public:
     NFATransitionTable(const NFATransitionTable &nfa);
     ~NFATransitionTable();
 
+
+      void add(const std::set<State> &currentStates, char input, const std::set<State> &nextStates);
+    std::set<State> nextStates(const std::set<State> &currentStates, char input) const;
+	std::map<char, std::set<State> > getMapping(const std::set<State> &currentStates) const;
+	std::set<State> getStartingSet() const;
+	 std::set<State> startingSet;
+	 std::set<State> endingSet;
 	const NFATransitionTable &operator=(const NFATransitionTable &nfa);
 
 	void setTransition(const State &fromState, Input input, const State &toState);
@@ -52,6 +59,7 @@ public:
 	NFATransitionTable opConcat(const NFATransitionTable &rhs) const;
 	NFATransitionTable opPlus() const;
 	NFATransitionTable opStar() const;
+
 
 private:
 	struct impl;
