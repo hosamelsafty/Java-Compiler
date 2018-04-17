@@ -4,6 +4,7 @@
 #define minimizeDFA_H
 
 #include "lib/DFATransitionTable.h"
+#include "lib/AcceptedTokenMap.h"
 
 DFATransitionTable minimizeDFA(const DFATransitionTable &dfa);
 

@@ -2,7 +2,9 @@
 #define printTokensToScreen_H
 
 #include "lib/LexicalAnalyzer.h"
+#include "lib/Token.h"
+#include <iostream>
 
-void printTokensToScreen(const LexicalAnalyzer &lexicalAnalyzer);
+void printTokensToScreen(LexicalAnalyzer &lexicalAnalyzer);
 
 #endif // printTokensToScreen_H

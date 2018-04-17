@@ -1,50 +1,53 @@
 #include "convertNFAToDFA.h"
+#include "lib/AcceptedTokenMap.h"
 #include <queue>
 
+using namespace std;
 
-
-bool isAcceptance(std::set<State> s){
-    for(auto& st : s) {
-        if(st.getType() == ACCEPTING)
-            return true;
-    }
-    return false;
-}
-
+/* Returns a new DFA from an input NFA */
 DFATransitionTable convertNFAToDFA(const NFATransitionTable &nfa)
 {
-    using namespace std;
+    set<State> startingSet = nfa.epsClosure(nfa.getStartingStates());
 
-	map<set<State>,State> map;
+    map<set<State>,State> map;
     queue<set<State>> workingSet;
-    workingSet.push(nfa.getStartingSet());
+    workingSet.push(startingSet);
 
-    DFATransitionTable DFA;
     int newStateId = 0;
-    State  startState(newStateId++);
+    DFATransitionTable DFA;
+    State startState(newStateId++);
     startState.setType(STARTING);
-    map[nfa.getStartingSet()] = startState;
+    if(nfa.isAcceptingSet(startingSet)){
+        startState.setType(ACCEPTING);
+        DFA.addAcceptingState(startState);
+        string tkn = AcceptedTokenMap::getNFAMapping(startingSet);
+        AcceptedTokenMap::addDFAMapping(startState,tkn);
+    }
+    DFA.setStartingState(startState);
+    map[startingSet] = startState;
     while(!workingSet.empty())
     {
         set<State> s = workingSet.front();
         workingSet.pop();
-        for (auto& pair : nfa.getMapping(s))
-        {
-            if(map.find(pair.second) == map.end()){
+        for(char input :nfa.transitionAlphabet(s)){
+            // t = e-closure(move(s,I))
+            set<State> t = nfa.epsClosure(nfa.move(s,input));
+            // if t is not in map
+            if(map.find(t) == map.end()){ // A new set is found
+                // make a new DFA representative state of the NFA set
                 State newState(newStateId++);
-
-                if(isAcceptance(pair.second)){
+                if(nfa.isAcceptingSet(t)) {
                     newState.setType(ACCEPTING);
+                    DFA.addAcceptingState(newState);
+                    string tkn = AcceptedTokenMap::getNFAMapping(t);
+                    AcceptedTokenMap::addDFAMapping(newState,tkn);
                 }
-
-                if(isAcceptance(pair.second))
-                    newState.setType(ACCEPTING);
-
-                map[pair.second] = newState;
-                workingSet.push(pair.second);
+                map[t] = newState;
+                workingSet.push(t);
             }
-            DFA.add(map[s],pair.first,map[pair.second]);
+            // DFA[s,I] = map[t]
+            DFA.add(map[s],input, map[t]);
         }
     }
-	return DFA;
+    return DFA;
 }
