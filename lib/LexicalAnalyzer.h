@@ -2,6 +2,7 @@
 #define LexicalAnalyzer_H
 
 #include "DFATransitionTable.h"
+#include "AcceptedTokenMap.h"
 #include "Token.h"
 
 #include <iostream>
@@ -19,6 +20,18 @@ public:
 private:
     std::istream& input;
 //    ErrorLog& errLog;
+
+    LexicalAnalyzer(DFATransitionTable &transitionTable, std::istream& in, ErrorLog &errorLog);
+    ~LexicalAnalyzer();
+    Token* nextToken();
+private:
+    void getToken(std::istream& ,
+    		std::string&, int &indx, int &lastAccIndx,
+    		State& ,State& );
+    std::istream& input;
+    int noLine;
+    ErrorLog& errLog;
+
     DFATransitionTable& dfa_t;
     std::string remainingInput;
 };

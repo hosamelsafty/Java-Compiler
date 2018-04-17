@@ -3,7 +3,8 @@
 #include <iostream>
 #include <string>
 
-enum Type{
+enum Type
+{
 	REGULAR,
 	STARTING,
 	ACCEPTING,
@@ -11,6 +12,7 @@ enum Type{
 
 class State
 {
+
 private:
 	std::string matchToken; // every state should have the corresponding matched token.
 	int id;
@@ -21,11 +23,18 @@ public:
     State(int,const std::string);
     State(int,const std::string,Type);
 	std::string getMatchedToken() const;
+
 	void setType(Type t);
 	Type getType() const;
 	int getID() const;
+  	static int new_id;
+	const State &operator=(const State &s);
+	bool operator==(const State & s) const;
+	static int newID()
+	{
+		return new_id++;
+	}
 };
-
 bool operator<(const State &lhs, const State &rhs);
 
 #endif // State_H

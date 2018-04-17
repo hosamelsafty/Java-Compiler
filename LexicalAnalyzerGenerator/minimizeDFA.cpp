@@ -1,8 +1,8 @@
 #include "minimizeDFA.h"
 
-std::vector<std::pair<State, std::map<char, State> > > getAcceptedStates(std::vector<State> v);
+std::vector<std::pair<State, std::map<char, State> > > getAcceptedStates(const DFATransitionTable &dfa);
 
-std::vector<std::pair<State, std::map<char, State> > > getNotAcceptedStates(std::vector<State> v);
+std::vector<std::pair<State, std::map<char, State> > > getNotAcceptedStates(const DFATransitionTable &dfa);
 
 void
 matchStates(const DFATransitionTable &dfa,
@@ -19,6 +19,10 @@ split(std::vector<std::vector<std::pair<State, std::map<char, State> > > > &clas
 bool is_equal(std::vector<std::vector<std::pair<State, std::map<char, State> > > > classes, unsigned long long int end,
               std::map<char, State> m1, std::map<char, State> m2);
 
+void findStartingState (const DFATransitionTable &dfa,
+            std::vector<std::vector<std::pair<State, std::map<char, State> > > > &classes);
+void addAcceptedState (const DFATransitionTable &dfa,
+            std::vector<std::vector<std::pair<State, std::map<char, State> > > > &classes);
 #pragma clang diagnostic push
 
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
@@ -26,8 +30,8 @@ bool is_equal(std::vector<std::vector<std::pair<State, std::map<char, State> > >
 DFATransitionTable minimizeDFA(const DFATransitionTable &dfa) {
     std::vector<State> states = dfa.getStates();
     std::vector<std::vector<std::pair<State, std::map<char, State> > > > classes;
-    classes.push_back(getNotAcceptedStates(states));
-    classes.push_back(getAcceptedStates(states));
+    classes.push_back(getNotAcceptedStates(dfa));
+    classes.push_back(getAcceptedStates(dfa));
     bool finish = false;
     unsigned long long int end = 2;
     while (!finish) {
@@ -51,10 +55,25 @@ DFATransitionTable minimizeDFA(const DFATransitionTable &dfa) {
     }
     matchStates(dfa, classes);
     DFATransitionTable min_dfa;
+    bool startFound = false;
     unsigned long long int no_states = classes.size();
-    State _states[no_states];
+	std::vector<State> _states(no_states); // [no_states];
     for (int i = 0; i < no_states; i++) {
         _states[i] = State(i);
+        if (!startFound){
+			for(std::pair<State, std::map<char, State> >& pair: classes[i]){	//searching for starting state..
+				if (pair.first == dfa.getStartingState()){
+					min_dfa.setStartingState(_states[i]);
+					startFound = true;
+					break;
+				}
+			}
+        }
+        if (dfa.isAcceptingState(classes[i][0].first)){
+        	min_dfa.addAcceptingState(_states[i]);
+        	std::string s = AcceptedTokenMap::getDFAMapping(classes[i][0].first);
+        	AcceptedTokenMap::addDFAMapping(_states[i],s);
+        }
         _states[i].setType(classes[i][0].first.getType());
     }
     for (int i = 0; i < no_states; i++) {
@@ -69,27 +88,22 @@ DFATransitionTable minimizeDFA(const DFATransitionTable &dfa) {
 
 #pragma clang diagnostic pop
 
-
-std::vector<std::pair<State, std::map<char, State> > > getAcceptedStates(std::vector<State> v) {
+std::vector<std::pair<State, std::map<char, State> > > getAcceptedStates(const DFATransitionTable &dfa) {
     std::vector<std::pair<State, std::map<char, State> > > res;
-    unsigned long long int len = v.size();
-    for (int i = 0; i < len; i++) {
-        if (v[i].getType() == ACCEPTING) {
-            std::map<char, State> t;
-            res.emplace_back(v[i], t);
-        }
+    for(auto& accS: dfa.getAcceptingStates()){
+    	 std::map<char, State> t;
+    	 res.emplace_back(accS, t);
     }
     return res;
 }
 
-std::vector<std::pair<State, std::map<char, State> > > getNotAcceptedStates(std::vector<State> v) {
+std::vector<std::pair<State, std::map<char, State> > > getNotAcceptedStates(const DFATransitionTable &dfa) {
     std::vector<std::pair<State, std::map<char, State> > > res;
-    unsigned long long int len = v.size();
-    for (int i = 0; i < len; i++) {
-        if (v[i].getType() != ACCEPTING) {
-            std::map<char, State> t;
-            res.emplace_back(v[i], t);
-        }
+    for(auto& s : dfa.getStates()){
+    	if (!dfa.isAcceptingState(s)){
+    		std::map<char, State> t;
+    		res.emplace_back(s, t);
+    	}
     }
     return res;
 }
